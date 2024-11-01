@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
-    users: {
+    conversations: {
         required: true,
     },
 });
@@ -70,7 +70,7 @@ const props = defineProps({
                         <span class="font-bold">Online</span>
                         <span
                             class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                            >{{ users.length }}</span
+                            >{{ conversations.length }}</span
                         >
                     </div>
                     <div
@@ -84,16 +84,16 @@ const props = defineProps({
                         dark:[&::-webkit-scrollbar-thumb]:bg-gray-400" 
                     >
 
-                        <Link :href="route('chat.user',user.id)"
-                            class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" v-for="user in users" :key="user.id"
+                        <Link :href="route('conversations.show',conversation.id)"
+                            class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2" v-for="conversation in conversations" :key="conversation.id"
                         >
                             <div
                                 class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
                             >
-                                {{ user.name[0] }}
+                                {{ conversation.users[0].name[0] }}
                             </div>
                             <div class="ml-2 text-sm font-semibold">
-                                {{ user.name }}
+                                {{ conversation.users[0].name }}
                             </div>
                         </Link>
                        

@@ -2,14 +2,17 @@
 import Dashboard from "@/Pages/Dashboard.vue";
 
 const props = defineProps({
-    users: {
+    conversations: {
+        required: true,
+    },
+    messages: {
         required: true,
     },
 });
 </script>
 
 <template>
-    <Dashboard :users="users">
+    <Dashboard :conversations="conversations">
         <div class="flex flex-col h-full overflow-x-auto mb-4">
             <div class="flex flex-col h-full">
                 <div class="grid grid-cols-12 gap-y-2">

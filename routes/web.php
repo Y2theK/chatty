@@ -4,6 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
@@ -31,11 +32,15 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::redirect('/dashboard', '/conversations', 301)->name('dashboard');
     Route::get('/chat/{user}', [MessageController::class, 'show'])->name('chat.user');
 
     Route::get('/messages/{user}', [MessageController::class, 'getMessages']);
     Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
+
+    Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+
 });
 
 require __DIR__.'/auth.php';

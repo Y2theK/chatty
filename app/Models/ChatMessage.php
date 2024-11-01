@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Chat extends Model
+class ChatMessage extends Model
 {
     protected $guarded = [];
 
@@ -13,5 +13,8 @@ class Chat extends Model
     {
         return $this->belongsTo(User::class);
     }
-
+    public function conversation() :BelongsTo
+    {
+        return $this->belongsTo(Conversation::class);
+    }
 }
