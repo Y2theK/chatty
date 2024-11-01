@@ -12,7 +12,10 @@ class MessageController extends Controller
 {
     public function show(User $user)
     {
-        return Inertia::render('Chat/PrivateChat',[
+        $users = User::whereNot('id', auth()->id())->get();
+
+        return Inertia::render('Chat/Chat',[
+            'users' => $users,
             'user' => $user,
             'currentUser' => auth()->user()
         ]);

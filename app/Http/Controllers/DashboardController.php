@@ -12,10 +12,10 @@ class DashboardController extends Controller
     {
         $users = User::whereNot('id', auth()->id())->get();
 
-        return Inertia::render('Dashboard',[
+        return Inertia::render('Chat/EmptyChat',[
             'users' => $users
         ]);
 
-        // return view('dashboard', compact('users'));
     }
+    
 }
