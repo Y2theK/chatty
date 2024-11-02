@@ -55,6 +55,6 @@ class User extends Authenticatable
 
     public function conversations() : BelongsToMany
     {
-        return $this->belongsToMany(Conversation::class);
+        return $this->belongsToMany(Conversation::class)->distinct();
     }
 }

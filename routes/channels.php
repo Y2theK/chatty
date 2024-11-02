@@ -17,11 +17,21 @@ Broadcast::channel('chat.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-Broadcast::channel('conversation.{id}', function ($user, $id) {
-    $conversation = Conversation::where('id',$id)->first();
-    return $conversation->allUsers()->pluck('users.id')->contains($user->id);
-});
-
 Broadcast::channel('presence.chat', function ($user) {
     return ['id' => $user->id, 'name' => $user->name];
 });
+
+Broadcast::channel('conversation.{id}', function ($user, $id) {
+    return isUserContainsInConversation($user,$id);
+});
+
+Broadcast::channel('conversation.{id}', function ($user,$id) {
+    $isCorrectUser = isUserContainsInConversation($user,$id);
+    return $isCorrectUser ? ['id' => $user->id, 'name' => $user->name,'isOnline' => true] : [];
+});
+
+
+Broadcast::channel('online', function ($user) {
+    return ['id' => $user->id, 'name' => $user->name];
+});
+

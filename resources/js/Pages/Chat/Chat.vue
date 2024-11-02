@@ -1,7 +1,7 @@
 <script setup>
 import Dashboard from "@/Pages/Dashboard.vue";
 import { useForm } from "@inertiajs/vue3";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 const props = defineProps({
     conversations: {
@@ -32,9 +32,13 @@ const submit = () => {
 
 const messages = ref([...props.messages.data.reverse()]);
 const messageContainer = ref(null);
+const onlineUser = ref([]);
 const isUserTyping = ref(false);
 const typingUserName = ref("");
-const isUserTypingTimer = ref(null)
+const isUserTypingTimer = ref(null);
+
+const users = ref([...props.conversation.users]);
+
 watch(
     messages,
     () => {
@@ -81,11 +85,39 @@ onMounted(() => {
                 isUserTyping.value = false;
             }, 1000);
         });
+
+    window.Echo.join(`conversation.${props.conversation.id}`)
+            .here(users => {
+                onlineUser.value = users;
+                console.log(users);
+            })
+            .joining(user => {
+                onlineUser.value.push(user);
+            })
+            .leaving(user => {
+                onlineUser.value =onlineUser.value.filter((u) => u.id !== user.id);
+            })
 });
+
+    onBeforeUnmount(() => {
+        
+        window.Echo.leave(`conversation.${props.conversation.id}`,user => {
+            
+            onlineUser.value = onlineUser.value.filter((u) => u.id !== user.id);
+        })
+    })
 </script>
 
 <template>
     <Dashboard :conversations="conversations">
+        <div class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" >
+            <div v-for="user in onlineUser" :key="user.id" class="mr-2 border p-2 rounded">
+                <div class="text-lg font-semibold mr-2">{{ user.name }} 
+                    <span :class="onlineUser.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+                </div>
+            </div>
+            
+        </div>
         <div
             class="flex flex-col h-full overflow-x-auto mb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             ref="messageContainer"
@@ -174,7 +206,7 @@ onMounted(() => {
                             v-model="form.message"
                             required
                             @keydown="sendTypingEvent"
-                            autofocus
+                            
                         />
                         <button
                             class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"

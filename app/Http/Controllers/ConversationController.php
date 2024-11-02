@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Message;
 use App\Events\MessageSent;
@@ -39,7 +40,7 @@ class ConversationController extends Controller
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
-            'conversation' => $conversation
+            'conversation' => $conversation->load('users:id,name')
         ]);
     }
 
