@@ -77,6 +77,8 @@ const props = defineProps({
                 <Link
                     :href="route('conversations.show', conversation.id)"
                     v-for="conversation in conversations"
+                    :class="[route().current('conversations.show', conversation.id) ? 'bg-gray-100' : '']"
+                    class="rounded-xl"
                     :key="conversation.id"
                 >
                     <div
