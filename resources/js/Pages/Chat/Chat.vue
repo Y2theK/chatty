@@ -32,7 +32,7 @@ const submit = () => {
 
 const messages = ref([...props.messages.data.reverse()]);
 const messageContainer = ref(null);
-const onlineUser = ref([]);
+const onlineUsers = ref([]); //online users in this conversations
 const isUserTyping = ref(false);
 const typingUserName = ref("");
 const isUserTypingTimer = ref(null);
@@ -88,14 +88,14 @@ onMounted(() => {
 
     window.Echo.join(`conversation.${props.conversation.id}`)
             .here(users => {
-                onlineUser.value = users;
-                console.log(users);
+                onlineUsers.value = users;
+                // console.log(users);
             })
             .joining(user => {
-                onlineUser.value.push(user);
+                onlineUsers.value.push(user);
             })
             .leaving(user => {
-                onlineUser.value =onlineUser.value.filter((u) => u.id !== user.id);
+                onlineUsers.value =onlineUsers.value.filter((u) => u.id !== user.id);
             })
 });
 
@@ -103,17 +103,18 @@ onMounted(() => {
         
         window.Echo.leave(`conversation.${props.conversation.id}`,user => {
             
-            onlineUser.value = onlineUser.value.filter((u) => u.id !== user.id);
+            onlineUsers.value = onlineUsers.value.filter((u) => u.id !== user.id);
         })
     })
 </script>
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" >
-            <div v-for="user in onlineUser" :key="user.id" class="mr-2 border p-2 rounded">
-                <div class="text-lg font-semibold mr-2">{{ user.name }} 
-                    <span :class="onlineUser.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+        <div class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" >Currently Active : 
+            <div v-for="user in onlineUsers" :key="user.id" class="mx-2">
+                <div class="text-lg font-semibold mr-2 border p-2 rounded" >
+                    {{ user.name }} 
+                    <span :class="onlineUsers.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
                 </div>
             </div>
             

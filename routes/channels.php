@@ -27,7 +27,7 @@ Broadcast::channel('conversation.{id}', function ($user, $id) {
 
 Broadcast::channel('conversation.{id}', function ($user,$id) {
     $isCorrectUser = isUserContainsInConversation($user,$id);
-    return $isCorrectUser ? ['id' => $user->id, 'name' => $user->name,'isOnline' => true] : [];
+    return $isCorrectUser ? ['id' => $user->id, 'name' => $user->name] : [];
 });
 
 

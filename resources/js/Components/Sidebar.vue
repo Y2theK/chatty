@@ -1,7 +1,7 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
 import axios from "axios";
-import { onMounted } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 
 const props = defineProps({
     conversations: {
@@ -9,7 +9,35 @@ const props = defineProps({
     },
 });
 
+const groupColors = [
+    'bg-red-200',
+    'bg-green-200',
+    'bg-blue-200',
+    'bg-yellow-200',
+    'bg-gray-200',
+    'bg-scarlet-200'
+]
 
+const allOnlineUsers = ref([]);
+
+onMounted(() => {
+    window.Echo.join(`online`)
+            .here(users => {
+                allOnlineUsers.value = users;
+            })
+            .joining(user => {
+                allOnlineUsers.value.push(user);
+            })
+            .leaving(user => {
+                allOnlineUsers.value = allOnlineUsers.value.filter((u) => u.id !== user.id);
+            })
+})
+
+onBeforeMount(() => {        
+        window.Echo.leave(`online`,user => {
+            allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
+        })
+    })
 </script>
 
 <template>
@@ -68,13 +96,14 @@ const props = defineProps({
         <div class="flex flex-col mt-8">
             <div class="flex flex-row items-center justify-between text-xs">
                 <span class="font-bold">Online</span>
+                <!-- online count have to exclude current user count -->
                 <span
                     class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                    >{{ conversations.length }}</span
+                    >{{ allOnlineUsers.length - 1 }}</span
                 >
             </div>
             <div
-                class="flex flex-col space-y-1 mt-4 -mx-2 h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+                class="flex flex-col space-y-1 mt-4 -mx-2  overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             >
                 <Link
                     :href="route('conversations.show', conversation.id)"
@@ -94,44 +123,54 @@ const props = defineProps({
                         </div>
                         <div class="ml-2 text-sm font-semibold">
                             {{ conversation.users[0].name }}
+                            <span :class="allOnlineUsers.find((u) => u.id == conversation.users[0].id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+
                         </div>
                     </div>
                     <div
                         v-else
                         class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                    >
-                        <div
-                            class="flex items-center justify-center h-8 w-8 bg-green-200 rounded-full"
-                        >
-                            {{ conversation.name[0].toUpperCase() }}
-                        </div>
+                    >                      
+                        <div class=" flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full">
+                                {{ $page.props.auth.user.name[0].toUpperCase() }} 
+                        </div> 
+                       <div v-for="(user,index) in conversation.users.slice(0,4)" :key="user.id">
+                            <div :class="groupColors[index]"
+                                class=" flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
+                            >
+                              {{ user.name[0] }}
+                            </div>
+                            
+                       </div>
                         <div class="ml-2 text-sm font-semibold">
                             {{ conversation.name }}
+                            
+                            <span :class="allOnlineUsers.find((u) => conversation.users.find((c) => c.id == u.id)) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
                         </div>
                     </div>
                 </Link>
             </div>
-            <div
-                class="flex flex-row items-center justify-between text-xs mt-6"
-            >
-                <span class="font-bold">Offline</span>
-                <span
-                    class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                    >7</span
+                <!-- <div
+                    class="flex flex-row items-center justify-between text-xs mt-6"
                 >
-            </div>
-            <div class="flex flex-col space-y-1 mt-4 -mx-2">
-                <button
-                    class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                >
-                    <div
-                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                    <span class="font-bold">Offline</span>
+                    <span
+                        class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
+                        >7</span
                     >
-                        H
-                    </div>
-                    <div class="ml-2 text-sm font-semibold">Henry Boyd</div>
-                </button>
-            </div>
+                </div>
+                <div class="flex flex-col space-y-1 mt-4 -mx-2">
+                    <button
+                        class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
+                    >
+                        <div
+                            class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                        >
+                            H
+                        </div>
+                        <div class="ml-2 text-sm font-semibold">Henry Boyd</div>
+                    </button>
+                </div> -->
         </div>
     </div>
 </template>
