@@ -143,7 +143,7 @@ onBeforeMount(() => {
                             
                        </div>
                         <div class="ml-2 text-sm font-semibold">
-                            {{ conversation.name }}
+                            {{ conversation.name.toUpperCase() }}
                             
                             <span :class="allOnlineUsers.find((u) => conversation.users.find((c) => c.id == u.id)) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
                         </div>

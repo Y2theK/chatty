@@ -110,11 +110,19 @@ onMounted(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" >Currently Active : 
-            <div v-for="user in onlineUsers" :key="user.id" class="mx-2">
-                <div class="text-lg font-semibold mr-2 border p-2 rounded" >
-                    {{ user.name }} 
-                    <span :class="onlineUsers.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+        <div class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" >
+            <div v-if="users.length === 1" class="text-lg font-semibold mr-2 p-2 rounded">
+                {{ users[0].name }}
+                <span :class="onlineUsers.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+            </div>
+
+            <div  class="flex items-center bg-gray-100  border-b py-4 rounded-xl px-4" v-else>
+                <span class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded" v-show="conversation.name">{{ conversation.name.toUpperCase() }}</span>
+                <div v-for="user in onlineUsers" :key="user.id" class="" >
+                    <div class="text-lg font-semibold mr-2 border p-2 rounded" v-if="user.id !== auth.user.id">
+                        {{ user.name }} 
+                        <span :class="onlineUsers.find((u) => u.id == user.id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+                    </div>
                 </div>
             </div>
             
