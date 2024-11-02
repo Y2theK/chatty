@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
+    Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store');
 
 });
 

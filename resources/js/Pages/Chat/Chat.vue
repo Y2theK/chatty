@@ -1,35 +1,110 @@
 <script setup>
 import Dashboard from "@/Pages/Dashboard.vue";
-import { ref } from "vue";
+import { useForm } from "@inertiajs/vue3";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 const props = defineProps({
     conversations: {
+        required: true,
+    },
+    conversation: {
         required: true,
     },
     messages: {
         required: true,
     },
     auth: {
-        require: true
-    }
+        require: true,
+    },
+});
+const form = useForm({
+    message: "",
 });
 
-const messages = ref([...props.messages]);   
+const submit = () => {
+    if (form.message) {
+        form.post(route("conversations.store", props.conversation.id), {
+            message: form.message,
+            onFinish: () => (form.message = ""),
+        });
+    }
+};
 
+const messages = ref([...props.messages.data.reverse()]);
+const messageContainer = ref(null);
+const isUserTyping = ref(false);
+const typingUserName = ref("");
+const isUserTypingTimer = ref(null)
+watch(
+    messages,
+    () => {
+        nextTick(() => {
+            scrollToHeight();
+        });
+    },
+    { deep: true }
+);
 
+const sendTypingEvent = () => {
+    window.Echo.private(`conversation.${props.conversation.id}`).whisper(
+        "typing",
+        {
+            userID: props.auth.user.id,
+            userName: props.auth.user.name,
+        }
+    );
+};
+
+const scrollToHeight = () => {
+    messageContainer.value.scrollTo({
+        top: messageContainer.value.scrollHeight,
+        behavior: "smooth",
+    });
+};
+
+onMounted(() => {
+    scrollToHeight();
+
+    window.Echo.private(`conversation.${props.conversation.id}`)
+        .listen("ChatMessageSent", (response) => {
+            messages.value.push(response.chatMessage);
+        })
+        .listenForWhisper("typing", (response) => {
+            isUserTyping.value = response.userID !== props.auth.user.id;
+            typingUserName.value = response.userName;
+
+            if (isUserTypingTimer.value) {
+                clearTimeout(isUserTypingTimer.value);
+            }
+
+            isUserTypingTimer.value = setTimeout(() => {
+                isUserTyping.value = false;
+            }, 1000);
+        });
+});
 </script>
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="flex flex-col h-full overflow-x-auto mb-4">
+        <div
+            class="flex flex-col h-full overflow-x-auto mb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+            ref="messageContainer"
+        >
             <div class="flex flex-col h-full" v-if="messages.length">
-                <div class="grid grid-cols-12 gap-y-2" v-for="message in messages" :key="message.id">
-                    <div class="col-start-6 col-end-13 p-3 rounded-lg" v-if="auth.user.id === message.user_id">
+                <div
+                    class="grid grid-cols-12 gap-y-2"
+                    v-for="message in messages"
+                    :key="message.id"
+                >
+                    <div
+                        class="col-start-6 col-end-13 p-3 rounded-lg"
+                        v-if="auth.user.id === message.user_id"
+                    >
                         <div
                             class="flex items-center justify-start flex-row-reverse"
                         >
                             <div
-                                class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0"
+                                class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
                             >
                                 {{ message.user.name[0] }}
                             </div>
@@ -43,7 +118,7 @@ const messages = ref([...props.messages]);
                     <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>
                         <div class="flex flex-row items-center">
                             <div
-                                class="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0"
+                                class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
                             >
                                 {{ message.user.name[0] }}
                             </div>
@@ -56,10 +131,11 @@ const messages = ref([...props.messages]);
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col h-full justify-center items-center" v-else>
-                <p class="text-2xl font-bold">
-                    No messages
-                </p>
+            <div
+                class="flex flex-col h-full justify-center items-center"
+                v-else
+            >
+                <p class="text-2xl font-bold">No messages</p>
             </div>
         </div>
         <div
@@ -85,55 +161,68 @@ const messages = ref([...props.messages]);
                     </svg>
                 </button>
             </div>
-            <div class="flex-grow ml-4">
-                <div class="relative w-full">
-                    <input
-                        type="text"
-                        class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
-                    />
-                    <button
-                        class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
-                    >
-                        <svg
-                            class="w-6 h-6"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
+
+            <form
+                @submit.prevent="submit"
+                class="flex justify-center items-center flex-grow"
+            >
+                <div class="ml-4 flex-grow">
+                    <div class="relative w-full">
+                        <input
+                            type="text"
+                            class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
+                            v-model="form.message"
+                            required
+                            @keydown="sendTypingEvent"
+                            autofocus
+                        />
+                        <button
+                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                        </svg>
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                ></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <small v-if="isUserTyping" class="text-gray-600 mt-5">
+                        {{ typingUserName }} is typing...
+                    </small>
+                </div>
+                <div class="ml-4">
+                    <button
+                        class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-2 flex-shrink-0"
+                    >
+                        <span>Send</span>
+                        <span class="ml-2">
+                            <svg
+                                class="w-4 h-4 transform rotate-45 -mt-px"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                ></path>
+                            </svg>
+                        </span>
                     </button>
                 </div>
-            </div>
-            <div class="ml-4">
-                <button
-                    class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-1 flex-shrink-0"
-                >
-                    <span>Send</span>
-                    <span class="ml-2">
-                        <svg
-                            class="w-4 h-4 transform rotate-45 -mt-px"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                            ></path>
-                        </svg>
-                    </span>
-                </button>
-            </div>
+            </form>
         </div>
     </Dashboard>
 </template>
