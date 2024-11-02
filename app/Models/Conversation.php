@@ -19,7 +19,7 @@ class Conversation extends Model
    
     public function users() : BelongsToMany
     {
-        return $this->belongsToMany(User::class)->whereNot('user_id',auth()->id());
+        return $this->belongsToMany(User::class)->whereNot('user_id',auth()->id())->distinct();
     }
 
     public function messages() : HasMany
