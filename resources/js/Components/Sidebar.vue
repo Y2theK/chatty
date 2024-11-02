@@ -12,10 +12,9 @@ const props = defineProps({
 const groupColors = [
     'bg-red-200',
     'bg-green-200',
-    'bg-blue-200',
+    'bg-purple-200',
     'bg-yellow-200',
-    'bg-gray-200',
-    'bg-scarlet-200'
+    'bg-violet-200'
 ]
 
 const allOnlineUsers = ref([]);
@@ -134,8 +133,8 @@ onBeforeMount(() => {
                         <div class=" flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full">
                                 {{ $page.props.auth.user.name[0].toUpperCase() }} 
                         </div> 
-                       <div v-for="(user,index) in conversation.users.slice(0,4)" :key="user.id">
-                            <div :class="groupColors[index]"
+                       <div v-for="(user,index) in conversation.users.slice(0,5)" :key="user.id">
+                            <div :class="groupColors[index % groupColors.length]"
                                 class=" flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
                             >
                               {{ user.name[0] }}

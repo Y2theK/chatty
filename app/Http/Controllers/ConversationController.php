@@ -20,6 +20,20 @@ class ConversationController extends Controller
     {
         
     }
+    public function addGroup(Conversation $conversation,Request $request)
+    {
+        $user = User::where('email',$request->email)->first();;
+
+        if($user){
+            ConversationUser::firstOrCreate([
+                'user_id' => $user->id,
+                'conversation_id' => $conversation->id
+            ]);
+            // boradcase noti
+        }
+
+        return redirect()->route('conversations.show',$conversation);
+    }
     public function index()
     {
 

@@ -39,8 +39,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
 
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store');
+
+    Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup');
+
 
 });
 
