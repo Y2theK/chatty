@@ -4,7 +4,7 @@ import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
-import { ChevronLeft,ChevronRight, LogOut  } from 'lucide-vue-next';
+import { ChevronLeft,ChevronRight, LogOut, Plus  } from 'lucide-vue-next';
 
 import {
     Dialog,
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
               
                 <Dialog>
                     <DialogTrigger as-child>
-                        <Button variant="outline"> Add to group</Button>
+                        <Button variant="outline">  <Plus class="w-4 h-4" />Add</Button>
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-md">
                         <DialogHeader>
