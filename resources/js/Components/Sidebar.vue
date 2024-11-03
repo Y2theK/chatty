@@ -173,7 +173,7 @@ onBeforeMount(() => {
                 <Dialog>
                     <DialogTrigger as-child>
                         <Button variant="outline" class="w-full">
-                            Create New Group
+                            Create New Conversation
                         </Button>
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-[425px]">
