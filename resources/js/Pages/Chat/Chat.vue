@@ -4,7 +4,7 @@ import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
-import { ChevronLeft,ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft,ChevronRight, LogOut  } from 'lucide-vue-next';
 
 import {
     Dialog,
@@ -66,6 +66,18 @@ const inviteToGroup = async () => {
         }
     }
 };
+
+
+const leaveGroup = async() => {
+    try {
+        const response = await axios.delete(
+            `/conversations/${props.conversation.id}/leave`
+        );
+        window.location.href = response.data.redirect;
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
+}
 
 const messages = ref([...props.messages.data.reverse()]);
 const messageContainer = ref(null);
@@ -156,7 +168,7 @@ onBeforeUnmount(() => {
                 </Link>
                 <div>
                     <div
-                        class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
+                        class="flex items-center bg-gray-100 rounded-xl px-4"
                         v-if="users.length === 1"
                     >
                         <div class="text-lg font-semibold mr-2 p-2 rounded">
@@ -203,7 +215,8 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
-            <div class="mx-4" >
+            <div class="mx-4 flex items-center gap-2" >
+              
                 <Dialog>
                     <DialogTrigger as-child>
                         <Button variant="outline"> Add to group</Button>
@@ -238,7 +251,11 @@ onBeforeUnmount(() => {
                         </div>
                     </DialogContent>
                 </Dialog>
+                <Button variant="outline" class="" @click="leaveGroup">
+                    <LogOut class="w-4 h-4" />Leave 
+                </Button>
             </div>
+            
         </div>
 
         <div

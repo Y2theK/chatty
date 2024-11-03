@@ -67,7 +67,7 @@ class ConversationController extends Controller
         if($user && $user !== auth()->user()){
 
             $conversation = Conversation::create([
-                'name' => ''
+                'name' => fake()->emoji()
             ]);
 
             ConversationUser::firstOrCreate([
@@ -119,6 +119,17 @@ class ConversationController extends Controller
             'redirect' => route('dashboard')
         ]);
       
+    }
+    public function leaveConversation(Conversation $conversation,Request $request)
+    {
+
+            ConversationUser::where('user_id',auth()->id())->where('conversation_id',$conversation->id)->delete();
+           
+            // boradcase noti
+            return response()->json([
+                'success' => true,
+                'redirect' => route('dashboard')
+            ]);      
     }
    
 }

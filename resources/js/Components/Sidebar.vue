@@ -2,8 +2,8 @@
 import { Link } from "@inertiajs/vue3";
 import { onBeforeMount, onMounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { UserPen } from 'lucide-vue-next';
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
+import { UserPen } from "lucide-vue-next";
 
 import {
     Dialog,
@@ -26,8 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { toTypedSchema } from "@vee-validate/zod";
-import { useForm } from 'vee-validate';
-
+import { useForm } from "vee-validate";
 
 import { h } from "vue";
 import * as z from "zod";
@@ -43,21 +42,18 @@ const form = useForm({
     validationSchema: formSchema,
 });
 
-const onSubmit = form.handleSubmit(async(values) => {
+const onSubmit = form.handleSubmit(async (values) => {
     try {
-            const response = await axios.post(
-                `/conversations/create`,
-                {
-                    email: values.email,
-                    message: values.message
-                }
-            );
-            window.location.href = response.data.redirect;
+        const response = await axios.post(`/conversations/create`, {
+            email: values.email,
+            message: values.message,
+        });
+        window.location.href = response.data.redirect;
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
+});
 
-        } catch (error) {
-            console.error("Failed to send message:", error);
-        }
-})
 
 const props = defineProps({
     conversations: {
@@ -128,8 +124,6 @@ onBeforeMount(() => {
         <div
             class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
         >
-           
-
             <div class="h-20 w-20 rounded-full border overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
@@ -152,21 +146,20 @@ onBeforeMount(() => {
                     ></div>
                 </div>
                 <div class="leading-none ml-1 text-xs">Active</div>
-                
             </div>
             <div class="flex items-center justify-center">
                 <ResponsiveNavLink
-                :href="route('logout')"
-                method="post"
-                as="button"
-            >
-                <Button class="w-full bg-red-600">Quit Chatting</Button>
-            </ResponsiveNavLink>
-            <Link :href="route('profile.edit')">
-                <Button variant="outline" size="icon" class="">
-                    <UserPen class="w-4 h-4" />
-                </Button>
-            </Link>
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
+                >
+                    <Button class="w-full bg-red-600">Quit Chatting</Button>
+                </ResponsiveNavLink>
+                <Link :href="route('profile.edit')">
+                    <Button variant="outline" size="icon" class="">
+                        <UserPen class="w-4 h-4" />
+                    </Button>
+                </Link>
             </div>
         </div>
         <div>
@@ -177,66 +170,63 @@ onBeforeMount(() => {
                     :validation-schema="formSchema"
                     @submit="onSubmit"
                 > -->
-                    <Dialog>
-                        <DialogTrigger as-child>
-                            <Button variant="outline" class="w-full">
-                                Create New Group
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent class="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle>Create New Group
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Invite someone you know by email to start a
-                                    new conversation or group.
-                                </DialogDescription>
-                            </DialogHeader>
+                <Dialog>
+                    <DialogTrigger as-child>
+                        <Button variant="outline" class="w-full">
+                            Create New Group
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent class="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Create New Group </DialogTitle>
+                            <DialogDescription>
+                                Invite someone you know by email to start a new
+                                conversation or group.
+                            </DialogDescription>
+                        </DialogHeader>
 
-                            <form @submit="onSubmit">
-                                <FormField
-                                    v-slot="{ componentField }"
-                                    name="email"
+                        <form @submit="onSubmit">
+                            <FormField v-slot="{ componentField }" name="email">
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="email"
+                                            placeholder="demo@gmail.com"
+                                            v-bind="componentField"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            </FormField>
+                            <FormField
+                                v-slot="{ componentField }"
+                                name="message"
+                            >
+                                <FormItem class="mt-2">
+                                    <FormLabel>Message</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="text"
+                                            placeholder="hi wassup"
+                                            v-bind="componentField"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            </FormField>
+                            <DialogFooter>
+                                <Button class="mt-2"
+                                    type="submit"
+                                    @click="onSubmit"
+                                    form="dialogForm"
                                 >
-                                    <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="email"
-                                                placeholder="demo@gmail.com"
-                                                v-bind="componentField"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                </FormField>
-                                <FormField
-                                    v-slot="{ componentField }"
-                                    name="message"
-                                >
-                                    <FormItem class="mt-2">
-                                        <FormLabel>Message</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="text"
-                                                placeholder="hi wassup"
-                                                v-bind="componentField"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                </FormField>
-                                <DialogFooter>
-                                <Button type="submit"                     @click="onSubmit"
-                                form="dialogForm">
                                     Send
                                 </Button>
                             </DialogFooter>
-                            </form>
-
-                           
-                        </DialogContent>
-                    </Dialog>
+                        </form>
+                    </DialogContent>
+                </Dialog>
                 <!-- </Form> -->
             </div>
         </div>
@@ -254,7 +244,7 @@ onBeforeMount(() => {
                 >
             </div>
             <div
-                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full  [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             >
                 <Link
                     :href="route('conversations.show', conversation.id)"
@@ -267,74 +257,87 @@ onBeforeMount(() => {
                     class="rounded-xl"
                     :key="conversation.id"
                 >
-                    <div
-                        v-if="conversation.users.length === 1"
-                        class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                    >
-                        <div
-                            class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                        >
-                            {{ conversation.users[0].name[0] }}
-                        </div>
-                        <div class="ml-2 text-sm font-semibold">
-                            {{ conversation.users[0].name }}
-                            <span
-                                :class="
-                                    allOnlineUsers.find(
-                                        (u) => u.id == conversation.users[0].id
-                                    )
-                                        ? 'bg-green-500'
-                                        : 'bg-red-400'
-                                "
-                                class="inline-block h-2 w-2 rounded-full"
-                            ></span>
-                        </div>
-                    </div>
-                    <div
-                        v-else
-                        class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                    >
-                        <div
-                            class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                        >
-                            {{ $page.props.auth.user.name[0].toUpperCase() }}
-                        </div>
-                        <div
-                            v-for="(user, index) in conversation.users.slice(
-                                0,
-                                5
-                            )"
-                            :key="user.id"
-                        >
+                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl">
+                        <div>
                             <div
-                                :class="groupColors[index % groupColors.length]"
-                                class="flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
+                                v-if="conversation.users.length === 1"
+                                class="flex flex-row items-center rounded-xl p-2"
                             >
-                                {{ user.name[0] }}
+                                <div
+                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                >
+                                    {{ conversation.users[0].name[0] }}
+                                </div>
+                                <div class="ml-2 text-sm font-semibold">
+                                    {{ conversation.users[0].name }}
+                                    <span
+                                        :class="
+                                            allOnlineUsers.find(
+                                                (u) =>
+                                                    u.id ==
+                                                    conversation.users[0].id
+                                            )
+                                                ? 'bg-green-500'
+                                                : 'bg-red-400'
+                                        "
+                                        class="inline-block h-2 w-2 rounded-full"
+                                    ></span>
+                                </div>
+                            </div>
+                            <div
+                                v-else
+                                class="flex flex-row items-center  p-2"
+                            >
+                                <div
+                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                >
+                                    {{
+                                        $page.props.auth.user.name[0].toUpperCase()
+                                    }}
+                                </div>
+                                <div class=""
+                                    v-for="(
+                                        user, index
+                                    ) in conversation.users.slice(0, 5)"
+                                    :key="user.id"
+                                >
+                                    <div
+                                        :class="
+                                            groupColors[
+                                                index % groupColors.length
+                                            ]
+                                        "
+                                        class="flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
+                                    >
+                                        {{ user.name[0] }}
+                                    </div>
+                                </div>
+                                <div class="ml-2 text-sm font-semibold">
+                                    <span v-if="conversation.name">
+                                        {{ conversation.name?.toUpperCase() }}
+                                    </span>
+                                    <span
+                                        :class="
+                                            allOnlineUsers.find((u) =>
+                                                conversation.users.find(
+                                                    (c) => c.id == u.id
+                                                )
+                                            )
+                                                ? 'bg-green-500'
+                                                : 'bg-red-400'
+                                        "
+                                        class="inline-block h-2 w-2 rounded-full ml-2"
+                                    ></span>
+                                    
+                                </div>
+                               
                             </div>
                         </div>
-                        <div class="ml-2 text-sm font-semibold">
-                            <span v-if="conversation.name">       
-                                {{ conversation.name?.toUpperCase() }}
-                            </span>
-
-                            <span
-                                :class="
-                                    allOnlineUsers.find((u) =>
-                                        conversation.users.find(
-                                            (c) => c.id == u.id
-                                        )
-                                    )
-                                        ? 'bg-green-500'
-                                        : 'bg-red-400'
-                                "
-                                class="inline-block h-2 w-2 rounded-full"
-                            ></span>
-                        </div>
+                      
                     </div>
                 </Link>
             </div>
-          
+
             <!-- <div
                     class="flex flex-row items-center justify-between text-xs mt-6"
                 >

@@ -38,14 +38,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/messages/{user}', [MessageController::class, 'getMessages']);
     Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
 
-    Route::post('/conversations/create', [ConversationController::class, 'createConversation'])->name('conversations.createConversation');
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
+    Route::post('/conversations/create', [ConversationController::class, 'createConversation'])->name('conversations.createConversation'); // create new conversation
 
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
-    Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store');
+    Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store'); // message store
 
-    Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup');
-
+    Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup'); // invite to group or conversation
+    Route::delete('/conversations/{conversation}/leave', [ConversationController::class, 'leaveConversation'])->name('conversations.leaveConversation'); //leave conversation
 
 });
 
