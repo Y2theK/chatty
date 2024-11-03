@@ -15,12 +15,9 @@ Chatty is small a real time messaging app providing seemless experience of chatt
 
 ### Screenshots
 
-<img src="https://raw.githubusercontent.com/Y2theK/chatty/refs/heads/dev/public/images/1.png
-" width=50% height=50% alt= "Counter Order Page">
-<img src="https://raw.githubusercontent.com/Y2theK/chatty/refs/heads/dev/public/images/2.png
-" width=50% height=50% alt= "Counter Order Page">
-<img src="https://raw.githubusercontent.com/Y2theK/chatty/refs/heads/dev/public/images/3.png
-" width=50% height=50% alt= "Counter Order Page">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/1.png" width=50% height=50% alt= "HomePage">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/2.png" width=50% height=50% alt= "Chat Page">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/3.png" width=50% height=50% alt= "Add User">
 
 
 
