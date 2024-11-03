@@ -160,15 +160,16 @@ onBeforeMount(() => {
                     <Dialog>
                         <DialogTrigger as-child>
                             <Button variant="outline" class="w-full">
-                                Create conversation
+                                Create New Group
                             </Button>
                         </DialogTrigger>
                         <DialogContent class="sm:max-w-[425px]">
                             <DialogHeader>
-                                <DialogTitle>Create conversation</DialogTitle>
+                                <DialogTitle>Create New Group
+                                </DialogTitle>
                                 <DialogDescription>
                                     Invite someone you know by email to start a
-                                    new conversation.
+                                    new conversation or group.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -293,7 +294,7 @@ onBeforeMount(() => {
                             </div>
                         </div>
                         <div class="ml-2 text-sm font-semibold">
-                            {{ conversation.name.toUpperCase() }}
+                            {{ conversation.name?.toUpperCase() }}
 
                             <span
                                 :class="

@@ -146,8 +146,8 @@ onBeforeUnmount(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center">
+        <div class="flex items-center justify-between border-b py-4 ">
+            <div class="flex items-center ">
                 <Link :href="route('dashboard')">
                     <Button variant="outline" size="icon">
                         <ChevronLeft class="w-4 h-4" />
@@ -171,13 +171,13 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                     <div
-                        class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
+                        class="flex items-center bg-gray-100 rounded-xl px-4"
                         v-else
                     >
                         <span
                             class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
                             v-show="conversation.name"
-                            >{{ conversation.name.toUpperCase() }}</span
+                            >{{ conversation.name?.toUpperCase() }}</span
                         >
                         <div
                             v-for="user in onlineUsers"
@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
-            <div class="mx-4" v-if="users.length !== 1">
+            <div class="mx-4" >
                 <Dialog>
                     <DialogTrigger as-child>
                         <Button variant="outline"> Add to group</Button>
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
                         <DialogHeader>
                             <DialogTitle>Add new member</DialogTitle>
                             <DialogDescription>
-                                You can add someone to this group by email.
+                                You can add someone to this group by email. New member also got to see chat history.
                             </DialogDescription>
                         </DialogHeader>
                         <div>
