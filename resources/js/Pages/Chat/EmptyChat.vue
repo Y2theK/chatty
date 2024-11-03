@@ -6,7 +6,6 @@ const props = defineProps({
         required: true,
     },
 });
-console.log(props.conversations);
 
 </script>
 
@@ -15,7 +14,7 @@ console.log(props.conversations);
         <div
             class="flex flex-col h-full overflow-x-auto mb-4 justify-center items-center"
         >
-            <p class="text-3xl font-bold">
+            <p class="text-3xl font-bold text-center">
                 Select a chat or start a new conversation
             </p>
         </div>       

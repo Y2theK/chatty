@@ -2,6 +2,9 @@
 import { Link } from "@inertiajs/vue3";
 import { onBeforeMount, onMounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
+import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import { UserPen } from 'lucide-vue-next';
+
 import {
     Dialog,
     DialogContent,
@@ -125,6 +128,8 @@ onBeforeMount(() => {
         <div
             class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
         >
+           
+
             <div class="h-20 w-20 rounded-full border overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
@@ -138,7 +143,7 @@ onBeforeMount(() => {
             <div class="text-xs text-gray-500">
                 {{ $page.props.auth.user.email }}
             </div>
-            <div class="flex flex-row items-center mt-3">
+            <div class="flex flex-row items-center my-3">
                 <div
                     class="flex flex-col justify-center h-4 w-8 bg-indigo-500 rounded-full"
                 >
@@ -147,6 +152,21 @@ onBeforeMount(() => {
                     ></div>
                 </div>
                 <div class="leading-none ml-1 text-xs">Active</div>
+                
+            </div>
+            <div class="flex items-center justify-center">
+                <ResponsiveNavLink
+                :href="route('logout')"
+                method="post"
+                as="button"
+            >
+                <Button class="w-full bg-red-600">Quit Chatting</Button>
+            </ResponsiveNavLink>
+            <Link :href="route('profile.edit')">
+                <Button variant="outline" size="icon" class="">
+                    <UserPen class="w-4 h-4" />
+                </Button>
+            </Link>
             </div>
         </div>
         <div>
@@ -294,7 +314,9 @@ onBeforeMount(() => {
                             </div>
                         </div>
                         <div class="ml-2 text-sm font-semibold">
-                            {{ conversation.name?.toUpperCase() }}
+                            <span v-if="conversation.name">       
+                                {{ conversation.name?.toUpperCase() }}
+                            </span>
 
                             <span
                                 :class="
@@ -312,9 +334,17 @@ onBeforeMount(() => {
                     </div>
                 </Link>
             </div>
+          
             <!-- <div
                     class="flex flex-row items-center justify-between text-xs mt-6"
                 >
+                  <ResponsiveNavLink
+                                :href="route('logout')"
+                                method="post"
+                                as="button"
+                            >
+                                Log Out
+                            </ResponsiveNavLink>
                     <span class="font-bold">Offline</span>
                     <span
                         class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"

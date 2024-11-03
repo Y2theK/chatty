@@ -4,6 +4,7 @@ import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
+import { ChevronLeft,ChevronRight } from 'lucide-vue-next';
 
 import {
     Dialog,
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, ChevronLeft } from "lucide-vue-next";
+// import { UserRoundPen,UserPen } from "lucide-vue-next";
 
 import axios from "axios";
 

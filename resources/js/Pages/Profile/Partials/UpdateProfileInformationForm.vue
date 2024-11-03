@@ -4,6 +4,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ChevronRight, ChevronLeft } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
 
 defineProps({
     mustVerifyEmail: {
@@ -24,6 +26,11 @@ const form = useForm({
 
 <template>
     <section>
+        <Link :href="route('dashboard')">
+            <Button variant="outline" size="icon" class="mb-4">
+                <ChevronLeft class="w-4 h-4" />
+            </Button>
+        </Link>
         <header>
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Profile Information
