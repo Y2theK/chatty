@@ -1,7 +1,47 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
-import axios from "axios";
 import { onBeforeMount, onMounted, ref } from "vue";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
+import { toTypedSchema } from "@vee-validate/zod";
+import { h } from "vue";
+import * as z from "zod";
+
+const formSchema = toTypedSchema(
+    z.object({
+        message: z.string().min(2).max(50),
+    })
+);
+
+function onSubmit(values) {
+    toast({
+        title: "You submitted the following values:",
+        description: h(
+            "pre",
+            { class: "mt-2 w-[340px] rounded-md bg-slate-950 p-4" },
+            h("code", { class: "text-white" }, JSON.stringify(values, null, 2))
+        ),
+    });
+}
 
 const props = defineProps({
     conversations: {
@@ -10,37 +50,39 @@ const props = defineProps({
 });
 
 const groupColors = [
-    'bg-red-200',
-    'bg-green-200',
-    'bg-purple-200',
-    'bg-yellow-200',
-    'bg-violet-200'
-]
+    "bg-red-200",
+    "bg-green-200",
+    "bg-purple-200",
+    "bg-yellow-200",
+    "bg-violet-200",
+];
 
 const allOnlineUsers = ref([]);
 
 onMounted(() => {
     window.Echo.join(`online`)
-            .here(users => {
-                allOnlineUsers.value = users;
-            })
-            .joining(user => {
-                allOnlineUsers.value.push(user);
-            })
-            .leaving(user => {
-                allOnlineUsers.value = allOnlineUsers.value.filter((u) => u.id !== user.id);
-            })
-})
-
-onBeforeMount(() => {        
-        window.Echo.leave(`online`,user => {
-            allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
+        .here((users) => {
+            allOnlineUsers.value = users;
         })
-    })
+        .joining((user) => {
+            allOnlineUsers.value.push(user);
+        })
+        .leaving((user) => {
+            allOnlineUsers.value = allOnlineUsers.value.filter(
+                (u) => u.id !== user.id
+            );
+        });
+});
+
+onBeforeMount(() => {
+    window.Echo.leave(`online`, (user) => {
+        allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
+    });
+});
 </script>
 
 <template>
-    <div class="flex flex-col py-8 pl-6 pr-2 w-64 bg-white flex-shrink-0">
+    <div class="flex flex-col py-8 pl-6 pr-6 flex-shrink-0 w-full sm:w-64 sm:pr-1">
         <Link
             :href="route('dashboard')"
             class="flex flex-row items-center justify-center h-12 w-full"
@@ -92,22 +134,80 @@ onBeforeMount(() => {
                 <div class="leading-none ml-1 text-xs">Active</div>
             </div>
         </div>
+        <div>
+            <div class="mt-2 flex justify-center ">
+                <Form 
+                v-slot="{ submitForm }"
+                as=""
+                :validation-schema="formSchema"
+                @submit="onSubmit"
+            >
+                <Dialog>
+                    <DialogTrigger as-child>
+                        <Button variant="outline" class="w-full"> Create conversation </Button>
+                    </DialogTrigger>
+                    <DialogContent class="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Edit profile</DialogTitle>
+                            <DialogDescription>
+                                Make changes to your profile here. Click save
+                                when you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <form @submit="submitForm">
+                            <FormField
+                                v-slot="{ componentField }"
+                                name="username"
+                            >
+                                <FormItem>
+                                    <FormLabel>Username</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="text"
+                                            placeholder="shadcn"
+                                            v-bind="componentField"
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        This is your public display name.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            </FormField>
+                        </form>
+
+                        <DialogFooter>
+                            <Button type="submit" form="dialogForm">
+                                Save changes
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </Form>
+            </div>
+           
+        </div>
         <div class="flex flex-col mt-8">
             <div class="flex flex-row items-center justify-between text-xs">
                 <span class="font-bold">Online</span>
                 <!-- online count have to exclude current user count -->
                 <span
                     class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                    >{{ allOnlineUsers.length - 1 }}</span
+                    >{{ allOnlineUsers.length > 0 ? allOnlineUsers.length - 1 : '0' }}</span
                 >
             </div>
             <div
-                class="flex flex-col space-y-1 mt-4 -mx-2  overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             >
                 <Link
                     :href="route('conversations.show', conversation.id)"
                     v-for="conversation in conversations"
-                    :class="[route().current('conversations.show', conversation.id) ? 'bg-gray-100' : '']"
+                    :class="[
+                        route().current('conversations.show', conversation.id)
+                            ? 'bg-gray-100'
+                            : '',
+                    ]"
                     class="rounded-xl"
                     :key="conversation.id"
                 >
@@ -122,34 +222,61 @@ onBeforeMount(() => {
                         </div>
                         <div class="ml-2 text-sm font-semibold">
                             {{ conversation.users[0].name }}
-                            <span :class="allOnlineUsers.find((u) => u.id == conversation.users[0].id) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
-
+                            <span
+                                :class="
+                                    allOnlineUsers.find(
+                                        (u) => u.id == conversation.users[0].id
+                                    )
+                                        ? 'bg-green-500'
+                                        : 'bg-red-400'
+                                "
+                                class="inline-block h-2 w-2 rounded-full"
+                            ></span>
                         </div>
                     </div>
                     <div
                         v-else
                         class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                    >                      
-                        <div class=" flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full">
-                                {{ $page.props.auth.user.name[0].toUpperCase() }} 
-                        </div> 
-                       <div v-for="(user,index) in conversation.users.slice(0,5)" :key="user.id">
-                            <div :class="groupColors[index % groupColors.length]"
-                                class=" flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
+                    >
+                        <div
+                            class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                        >
+                            {{ $page.props.auth.user.name[0].toUpperCase() }}
+                        </div>
+                        <div
+                            v-for="(user, index) in conversation.users.slice(
+                                0,
+                                5
+                            )"
+                            :key="user.id"
+                        >
+                            <div
+                                :class="groupColors[index % groupColors.length]"
+                                class="flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
                             >
-                              {{ user.name[0] }}
+                                {{ user.name[0] }}
                             </div>
-                            
-                       </div>
+                        </div>
                         <div class="ml-2 text-sm font-semibold">
                             {{ conversation.name.toUpperCase() }}
-                            
-                            <span :class="allOnlineUsers.find((u) => conversation.users.find((c) => c.id == u.id)) ? 'bg-green-500' : 'bg-red-400'" class="inline-block h-2 w-2 rounded-full"></span>
+
+                            <span
+                                :class="
+                                    allOnlineUsers.find((u) =>
+                                        conversation.users.find(
+                                            (c) => c.id == u.id
+                                        )
+                                    )
+                                        ? 'bg-green-500'
+                                        : 'bg-red-400'
+                                "
+                                class="inline-block h-2 w-2 rounded-full"
+                            ></span>
                         </div>
                     </div>
                 </Link>
             </div>
-                <!-- <div
+            <!-- <div
                     class="flex flex-row items-center justify-between text-xs mt-6"
                 >
                     <span class="font-bold">Offline</span>

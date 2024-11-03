@@ -3,6 +3,8 @@ import Dashboard from "@/Pages/Dashboard.vue";
 import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
+import { Link } from "@inertiajs/vue3";
+
 import {
     Dialog,
     DialogClose,
@@ -15,7 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronRight } from "lucide-vue-next";
+import { ChevronRight, ChevronLeft } from "lucide-vue-next";
+
 import axios from "axios";
 
 const props = defineProps({
@@ -44,21 +47,24 @@ const submit = () => {
         });
     }
 };
-const addedEmail = ref('');
+const addedEmail = ref("");
 
 const inviteToGroup = async () => {
-        if (addedEmail.value.trim() !== '') {
-            try {
-                    const response = await axios.post(`/conversations/${props.conversation.id}/add`, {
+    if (addedEmail.value.trim() !== "") {
+        try {
+            const response = await axios.post(
+                `/conversations/${props.conversation.id}/add`,
+                {
                     email: addedEmail.value,
-                });
-                addedEmail.value = '';
-                location.reload();
-            } catch (error) {
-                console.error("Failed to send message:", error);
-            }
+                }
+            );
+            addedEmail.value = "";
+            location.reload();
+        } catch (error) {
+            console.error("Failed to send message:", error);
         }
-    };
+    }
+};
 
 const messages = ref([...props.messages.data.reverse()]);
 const messageContainer = ref(null);
@@ -141,46 +147,57 @@ onBeforeUnmount(() => {
 <template>
     <Dashboard :conversations="conversations">
         <div class="flex items-center justify-between">
-            <div>
-                <div
-                    class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
-                    v-if="users.length === 1"
-                >
-                    <div class="text-lg font-semibold mr-2 p-2 rounded">
-                        {{ users[0].name }}
-                        <span
-                            :class="
-                                onlineUsers.find((u) => u.id == users[0].id)
-                                    ? 'bg-green-500'
-                                    : 'bg-red-400'
-                            "
-                            class="inline-block h-2 w-2 rounded-full"
-                        ></span>
-                    </div>
-                </div>
-                <div
-                    class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
-                    v-else
-                >
-                    <span
-                        class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
-                        v-show="conversation.name"
-                        >{{ conversation.name.toUpperCase() }}</span
+            <div class="flex items-center">
+                <Link :href="route('dashboard')">
+                    <Button variant="outline" size="icon">
+                        <ChevronLeft class="w-4 h-4" />
+                    </Button>
+                </Link>
+                <div>
+                    <div
+                        class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
+                        v-if="users.length === 1"
                     >
-                    <div v-for="user in onlineUsers" :key="user.id" class="">
-                        <div
-                            class="text-lg font-semibold mr-2 border p-2 rounded"
-                            v-if="user.id !== auth.user.id"
-                        >
-                            {{ user.name }}
+                        <div class="text-lg font-semibold mr-2 p-2 rounded">
+                            {{ users[0].name }}
                             <span
                                 :class="
-                                    onlineUsers.find((u) => u.id == user.id)
+                                    onlineUsers.find((u) => u.id == users[0].id)
                                         ? 'bg-green-500'
                                         : 'bg-red-400'
                                 "
                                 class="inline-block h-2 w-2 rounded-full"
                             ></span>
+                        </div>
+                    </div>
+                    <div
+                        class="flex items-center bg-gray-100 border-b py-4 rounded-xl px-4"
+                        v-else
+                    >
+                        <span
+                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
+                            v-show="conversation.name"
+                            >{{ conversation.name.toUpperCase() }}</span
+                        >
+                        <div
+                            v-for="user in onlineUsers"
+                            :key="user.id"
+                            class=""
+                        >
+                            <div
+                                class="text-md font-semibold mr-2 border p-2 rounded h-10"
+                                v-if="user.id !== auth.user.id"
+                            >
+                                {{ user.name.split(" ")[0] }}
+                                <span
+                                    :class="
+                                        onlineUsers.find((u) => u.id == user.id)
+                                            ? 'bg-green-500'
+                                            : 'bg-red-400'
+                                    "
+                                    class="inline-block h-2 w-2 rounded-full"
+                                ></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -198,10 +215,19 @@ onBeforeUnmount(() => {
                             </DialogDescription>
                         </DialogHeader>
                         <div>
-                            <form @submit.prevent="inviteToGroup" class="w-full flex items-center space-x-2">
+                            <form
+                                @submit.prevent="inviteToGroup"
+                                class="w-full flex items-center space-x-2"
+                            >
                                 <div class="grid flex-1 gap-2">
-                                    <Label for="email" class="sr-only"> Email </Label>
-                                    <Input id="email" type="email" v-model="addedEmail"/>
+                                    <Label for="email" class="sr-only">
+                                        Email
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        v-model="addedEmail"
+                                    />
                                 </div>
                                 <Button type="submit" size="lg" class="px-3">
                                     <span class="sr-only">Copy</span>
