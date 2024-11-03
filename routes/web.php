@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/messages/{user}', [MessageController::class, 'getMessages']);
     Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
 
+    Route::post('/conversations/create', [ConversationController::class, 'createConversation'])->name('conversations.createConversation');
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
 
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');

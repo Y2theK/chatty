@@ -23,25 +23,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { toTypedSchema } from "@vee-validate/zod";
+import { useForm } from 'vee-validate';
+
+
 import { h } from "vue";
 import * as z from "zod";
 
 const formSchema = toTypedSchema(
     z.object({
         message: z.string().min(2).max(50),
+        email: z.string().email(),
     })
 );
 
-function onSubmit(values) {
-    toast({
-        title: "You submitted the following values:",
-        description: h(
-            "pre",
-            { class: "mt-2 w-[340px] rounded-md bg-slate-950 p-4" },
-            h("code", { class: "text-white" }, JSON.stringify(values, null, 2))
-        ),
-    });
-}
+const form = useForm({
+    validationSchema: formSchema,
+});
+
+const onSubmit = form.handleSubmit(async(values) => {
+    try {
+            const response = await axios.post(
+                `/conversations/create`,
+                {
+                    email: values.email,
+                    message: values.message
+                }
+            );
+            window.location.href = response.data.redirect;
+
+        } catch (error) {
+            console.error("Failed to send message:", error);
+        }
+})
 
 const props = defineProps({
     conversations: {
@@ -82,7 +95,9 @@ onBeforeMount(() => {
 </script>
 
 <template>
-    <div class="flex flex-col py-8 pl-6 pr-6 flex-shrink-0 w-full sm:w-64 sm:pr-1">
+    <div
+        class="flex flex-col py-8 pl-6 pr-6 flex-shrink-0 w-full sm:w-64 sm:pr-1"
+    >
         <Link
             :href="route('dashboard')"
             class="flex flex-row items-center justify-center h-12 w-full"
@@ -105,7 +120,7 @@ onBeforeMount(() => {
                     ></path>
                 </svg>
             </div>
-            <div class="ml-2 font-bold text-2xl">ChattyB</div>
+            <div class="ml-2 font-bold text-2xl">Chatty</div>
         </Link>
         <div
             class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
@@ -135,58 +150,74 @@ onBeforeMount(() => {
             </div>
         </div>
         <div>
-            <div class="mt-2 flex justify-center ">
-                <Form 
-                v-slot="{ submitForm }"
-                as=""
-                :validation-schema="formSchema"
-                @submit="onSubmit"
-            >
-                <Dialog>
-                    <DialogTrigger as-child>
-                        <Button variant="outline" class="w-full"> Create conversation </Button>
-                    </DialogTrigger>
-                    <DialogContent class="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit profile</DialogTitle>
-                            <DialogDescription>
-                                Make changes to your profile here. Click save
-                                when you're done.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <form @submit="submitForm">
-                            <FormField
-                                v-slot="{ componentField }"
-                                name="username"
-                            >
-                                <FormItem>
-                                    <FormLabel>Username</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="text"
-                                            placeholder="shadcn"
-                                            v-bind="componentField"
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        This is your public display name.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            </FormField>
-                        </form>
-
-                        <DialogFooter>
-                            <Button type="submit" form="dialogForm">
-                                Save changes
+            <div class="mt-2 flex justify-center">
+                <!-- <Form
+                    v-slot="{ submitForm }"
+                    as=""
+                    :validation-schema="formSchema"
+                    @submit="onSubmit"
+                > -->
+                    <Dialog>
+                        <DialogTrigger as-child>
+                            <Button variant="outline" class="w-full">
+                                Create conversation
                             </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </Form>
+                        </DialogTrigger>
+                        <DialogContent class="sm:max-w-[425px]">
+                            <DialogHeader>
+                                <DialogTitle>Create conversation</DialogTitle>
+                                <DialogDescription>
+                                    Invite someone you know by email to start a
+                                    new conversation.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <form @submit="onSubmit">
+                                <FormField
+                                    v-slot="{ componentField }"
+                                    name="email"
+                                >
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="email"
+                                                placeholder="demo@gmail.com"
+                                                v-bind="componentField"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                </FormField>
+                                <FormField
+                                    v-slot="{ componentField }"
+                                    name="message"
+                                >
+                                    <FormItem class="mt-2">
+                                        <FormLabel>Message</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="text"
+                                                placeholder="hi wassup"
+                                                v-bind="componentField"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                </FormField>
+                                <DialogFooter>
+                                <Button type="submit"                     @click="onSubmit"
+                                form="dialogForm">
+                                    Send
+                                </Button>
+                            </DialogFooter>
+                            </form>
+
+                           
+                        </DialogContent>
+                    </Dialog>
+                <!-- </Form> -->
             </div>
-           
         </div>
         <div class="flex flex-col mt-8">
             <div class="flex flex-row items-center justify-between text-xs">
@@ -194,7 +225,11 @@ onBeforeMount(() => {
                 <!-- online count have to exclude current user count -->
                 <span
                     class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                    >{{ allOnlineUsers.length > 0 ? allOnlineUsers.length - 1 : '0' }}</span
+                    >{{
+                        allOnlineUsers.length > 0
+                            ? allOnlineUsers.length - 1
+                            : "0"
+                    }}</span
                 >
             </div>
             <div

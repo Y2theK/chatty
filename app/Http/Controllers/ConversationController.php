@@ -20,20 +20,8 @@ class ConversationController extends Controller
     {
         
     }
-    public function addGroup(Conversation $conversation,Request $request)
-    {
-        $user = User::where('email',$request->email)->first();;
 
-        if($user){
-            ConversationUser::firstOrCreate([
-                'user_id' => $user->id,
-                'conversation_id' => $conversation->id
-            ]);
-            // boradcase noti
-        }
-
-        return redirect()->route('conversations.show',$conversation);
-    }
+   
     public function index()
     {
 
@@ -70,6 +58,67 @@ class ConversationController extends Controller
 
         return redirect()->route('conversations.show',$conversation);
         // return response()->json($message);
+    }
+
+    public function createConversation(Request $request)
+    {
+        $user = User::where('email',$request->email)->first();;
+
+        if($user && $user !== auth()->user()){
+
+            $conversation = Conversation::create([
+                'name' => ''
+            ]);
+
+            ConversationUser::firstOrCreate([
+                'user_id' => $user->id,
+                'conversation_id' => $conversation->id
+            ]);
+
+            ConversationUser::firstOrCreate([
+                'user_id' => auth()->id(),
+                'conversation_id' => $conversation->id
+            ]);
+
+            ChatMessage::create([
+                'user_id' => auth()->id(),
+                'conversation_id' => $conversation->id,
+                'message' => $request->message
+            ]);
+            // boradcase noti
+
+            return response()->json([
+                'success' => true,
+                'redirect' => route('conversations.show',$conversation)
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'redirect' => route('dashboard')
+        ]);
+    }
+
+    public function addGroup(Conversation $conversation,Request $request)
+    {
+        $user = User::where('email',$request->email)->first();;
+
+        if($user){
+            ConversationUser::firstOrCreate([
+                'user_id' => $user->id,
+                'conversation_id' => $conversation->id
+            ]);
+            // boradcase noti
+            return response()->json([
+                'success' => true,
+                'redirect' => route('conversations.show',$conversation)
+            ]);
+        }
+        return response()->json([
+            'success' => true,
+            'redirect' => route('dashboard')
+        ]);
+      
     }
    
 }

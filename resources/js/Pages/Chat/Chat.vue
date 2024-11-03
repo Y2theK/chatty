@@ -356,8 +356,8 @@ onBeforeUnmount(() => {
                     <button
                         class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-2 flex-shrink-0"
                     >
-                        <span>Send</span>
-                        <span class="ml-2">
+                        <!-- <span>Send</span> -->
+                        <span class="">
                             <svg
                                 class="w-4 h-4 transform rotate-45 -mt-px"
                                 fill="none"
