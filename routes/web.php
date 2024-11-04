@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/conversations/{conversation}', [ConversationController::class, 'show'])->name('conversations.show');
     Route::post('/conversations/{conversation}', [ConversationController::class, 'store'])->name('conversations.store'); // message store
+    Route::delete('/conversations/{conversation}/messages/{message}', [ConversationController::class, 'deleteMessage'])->name('conversations.deleteMessage'); // message store
 
     Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup'); // invite to group or conversation
     Route::delete('/conversations/{conversation}/leave', [ConversationController::class, 'leaveConversation'])->name('conversations.leaveConversation'); //leave conversation

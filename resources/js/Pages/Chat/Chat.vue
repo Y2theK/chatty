@@ -4,7 +4,7 @@ import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
-import { ChevronLeft,ChevronRight, LogOut, Plus  } from 'lucide-vue-next';
+import { ChevronLeft,ChevronRight, LogOut, Plus, Trash  } from 'lucide-vue-next';
 
 import {
     Dialog,
@@ -66,6 +66,20 @@ const inviteToGroup = async () => {
         }
     }
 };
+
+const deleteMessage = async(id) => {
+    console.log(id);
+    
+        try {
+            document.getElementById(`message-${id}`).innerHTML = 'Message deleted';
+            const response = await axios.delete(
+                `/conversations/${props.conversation.id}/messages/${id}`,
+            );
+
+        } catch (error) {
+            console.error("Failed to send message:", error);
+        }
+}
 
 
 const leaveGroup = async() => {
@@ -289,11 +303,15 @@ onBeforeUnmount(() => {
                             >
                                 {{ message.user.name[0] }}
                             </div>
-                            <div
-                                class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl"
+                            <div :id="'message-'+message.id"
+                                class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between group"
                             >
-                                <div>{{ message.message }}</div>
-                            </div>
+                            <div>{{ message.message }}</div>
+                            <Trash class="w-4 h-4 cursor-pointer hidden group-hover:block"  @click="deleteMessage(message.id)"/>
+
+                        </div>
+
+
                         </div>
                     </div>
                     <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>

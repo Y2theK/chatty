@@ -21,6 +21,7 @@ class ConversationController extends Controller
         
     }
 
+    
    
     public function index()
     {
@@ -46,6 +47,19 @@ class ConversationController extends Controller
         ]);
     }
 
+    public function deleteMessage(Conversation $conversation,ChatMessage $message)
+    {
+        $message = ChatMessage::where([
+            'user_id' => auth()->id(),
+            'conversation_id' => $conversation->id,
+            'id' => $message->id
+        ])->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Deleted Message"
+        ]);
+    }
     public function store(Request $request,Conversation $conversation)
     {
         $message = ChatMessage::create([
