@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 // import { UserRoundPen,UserPen } from "lucide-vue-next";
-
+import moment from "moment";
 import axios from "axios";
 
 const props = defineProps({
@@ -138,20 +138,26 @@ onMounted(() => {
     window.Echo.join(`conversation.${props.conversation.id}`)
         .here((users) => {
             onlineUsers.value = users;
-            // console.log(users);
+            console.log("here");
         })
         .joining((user) => {
+            console.log("joining");
+
             onlineUsers.value.push(user);
         })
         .leaving((user) => {
             onlineUsers.value = onlineUsers.value.filter(
                 (u) => u.id !== user.id
             );
+            console.log("leaving");
+            
         });
 });
 
 onBeforeUnmount(() => {
+    console.log("unmount");
     window.Echo.leave(`conversation.${props.conversation.id}`, (user) => {
+        console.log("leave");
         onlineUsers.value = onlineUsers.value.filter((u) => u.id !== user.id);
     });
 });
@@ -172,6 +178,7 @@ onBeforeUnmount(() => {
                         v-if="users.length === 1"
                     >
                         <div class="text-lg font-semibold mr-2 p-2 rounded">
+                           <div>
                             {{ users[0].name }}
                             <span
                                 :class="
@@ -181,6 +188,8 @@ onBeforeUnmount(() => {
                                 "
                                 class="inline-block h-2 w-2 rounded-full"
                             ></span>
+                           </div>
+                           <small class=" font-normal text-xs">Last seen {{ users[0].last_active_at ? moment(users[0].last_active_at).fromNow() : 'a long time ago'  }}</small>
                         </div>
                     </div>
                     <div

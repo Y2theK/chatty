@@ -1,6 +1,6 @@
 <script setup>
 import { Link } from "@inertiajs/vue3";
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { UserPen } from "lucide-vue-next";
@@ -30,6 +30,7 @@ import { useForm } from "vee-validate";
 
 import { h } from "vue";
 import * as z from "zod";
+import { defaultDocument } from "@vueuse/core";
 
 const formSchema = toTypedSchema(
     z.object({
@@ -87,10 +88,30 @@ onMounted(() => {
 });
 
 onBeforeMount(() => {
+         
     window.Echo.leave(`online`, (user) => {
         allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
     });
 });
+
+onUnmounted(() => {
+    updateLastActiveAt();
+})
+
+const updateLastActiveAt = async (id) => {
+    
+    try {
+        const response = await axios.post(
+            `/users/updateLastActiveAt`
+        );
+        // console.log("lastActive");
+
+        // window.location.href = response.data.redirect;
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
+
+}
 </script>
 
 <template>

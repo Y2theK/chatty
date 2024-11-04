@@ -42,7 +42,7 @@ class ConversationController extends Controller
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
-            'conversation' => $conversation->load('users:id,name')
+            'conversation' => $conversation->load('users:id,name,last_active_at')
         ]);
     }
 
@@ -58,6 +58,22 @@ class ConversationController extends Controller
 
         return redirect()->route('conversations.show',$conversation);
         // return response()->json($message);
+    }
+
+    public function updateLastActiveAt(Request $request)
+    {
+        // $user = User::where('id',$id)->first();
+        auth()->user()->update([
+            'last_active_at' => now()
+        ]);
+        // dd(auth()->user());
+
+        // broadcast(new ChatMessageSent($message->load('user:id,name')));
+
+        return response()->json([
+            'success' => true,
+            'message' => "Updated Last Active"
+        ]);
     }
 
     public function createConversation(Request $request)

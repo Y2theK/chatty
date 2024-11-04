@@ -47,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup'); // invite to group or conversation
     Route::delete('/conversations/{conversation}/leave', [ConversationController::class, 'leaveConversation'])->name('conversations.leaveConversation'); //leave conversation
 
+    Route::post('/users/updateLastActiveAt', [ConversationController::class, 'updateLastActiveAt'])->name('conversations.updateLastActiveAt'); // update updateLastActiveAt
+
+
 });
 
 require __DIR__.'/auth.php';

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'last_active_at'
     ];
 
     /**
@@ -47,7 +48,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
     public function chats() : HasMany
     {
         return $this->hasMany(Chat::class);
