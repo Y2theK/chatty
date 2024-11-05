@@ -68,7 +68,7 @@ const inviteToGroup = async () => {
 };
 
 const deleteMessage = async(id) => {
-    console.log(id);
+        // console.log(id);
     
         try {
             document.getElementById(`message-${id}`).innerHTML = 'Message deleted';
@@ -152,10 +152,10 @@ onMounted(() => {
     window.Echo.join(`conversation.${props.conversation.id}`)
         .here((users) => {
             onlineUsers.value = users;
-            console.log("here");
+            // console.log("here");
         })
         .joining((user) => {
-            console.log("joining");
+            // console.log("joining");
 
             onlineUsers.value.push(user);
         })
@@ -163,15 +163,15 @@ onMounted(() => {
             onlineUsers.value = onlineUsers.value.filter(
                 (u) => u.id !== user.id
             );
-            console.log("leaving");
+            // console.log("leaving");
             
         });
 });
 
 onBeforeUnmount(() => {
-    console.log("unmount");
+    // console.log("unmount");
     window.Echo.leave(`conversation.${props.conversation.id}`, (user) => {
-        console.log("leave");
+        // console.log("leave");
         onlineUsers.value = onlineUsers.value.filter((u) => u.id !== user.id);
     });
 });
@@ -203,7 +203,7 @@ onBeforeUnmount(() => {
                                 class="inline-block h-2 w-2 rounded-full"
                             ></span>
                            </div>
-                           <small class=" font-normal text-xs">Last seen {{ users[0].last_active_at ? moment(users[0].last_active_at).fromNow() : 'a long time ago'  }}</small>
+                           <small v-if="! onlineUsers.find((u) => u.id == users[0].id)" class=" font-normal text-xs">Last seen {{ users[0].last_active_at ? moment(users[0].last_active_at).fromNow() : 'a long time ago'  }}</small>
                         </div>
                     </div>
                     <div
