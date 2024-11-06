@@ -26,6 +26,13 @@ class User extends Authenticatable
         'last_active_at'
     ];
 
+    protected $likeFilterFields = [
+        'name',
+        'email',
+    ];
+
+    protected $boolFilterFields = [];
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -57,4 +64,5 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Conversation::class)->distinct();
     }
+    
 }

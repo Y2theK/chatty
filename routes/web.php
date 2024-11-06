@@ -8,6 +8,7 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -33,10 +34,10 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('/dashboard', '/conversations', 301)->name('dashboard');
-    Route::get('/chat/{user}', [MessageController::class, 'show'])->name('chat.user');
+    // Route::get('/chat/{user}', [MessageController::class, 'show'])->name('chat.user');
 
-    Route::get('/messages/{user}', [MessageController::class, 'getMessages']);
-    Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
+    // Route::get('/messages/{user}', [MessageController::class, 'getMessages']);
+    // Route::post('/messages/{user}', [MessageController::class, 'sendMessage']);
 
     Route::get('/conversations', [ConversationController::class, 'index'])->name('conversations.index');
     Route::post('/conversations/create', [ConversationController::class, 'createConversation'])->name('conversations.createConversation'); // create new conversation
@@ -50,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/users/updateLastActiveAt', [ConversationController::class, 'updateLastActiveAt'])->name('conversations.updateLastActiveAt'); // update updateLastActiveAt
 
+    Route::get('users',[UserController::class,'index'])->name('users.index');
 
 });
 

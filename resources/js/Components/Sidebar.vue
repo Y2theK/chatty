@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/vue3";
 import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { UserPen } from "lucide-vue-next";
+import { Search, UserPen } from "lucide-vue-next";
 
 import {
     Dialog,
@@ -112,6 +112,21 @@ const updateLastActiveAt = async (id) => {
     }
 
 }
+const searchUsers = ref([]);
+const search = ref(null);
+const fetchUsers = async () => {
+    const params = { search: search.value }; // Set params
+
+    try {
+        // Use axios.get with params as the second argument
+        const response = await axios.get('users', { params });
+
+        console.log(response, search.value);
+        searchUsers.value = response.data;
+    } catch (error) {
+        console.error("Failed to fetch users:", error);
+    }
+};
 </script>
 
 <template>
@@ -183,7 +198,13 @@ const updateLastActiveAt = async (id) => {
                 </Link>
             </div>
         </div>
-        <div>
+        <div class="flex justify-center items-center">
+            <div class="relative w-full max-w-sm items-center mt-2  ">
+                <Input id="search" type="text" placeholder="Search..." class="pl-10" v-model="search" @keyup="fetchUsers"/>
+                <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
+                <Search class="size-6 text-muted-foreground" />
+                </span>
+            </div>
             <div class="mt-2 flex justify-center">
                 <!-- <Form
                     v-slot="{ submitForm }"
@@ -193,8 +214,8 @@ const updateLastActiveAt = async (id) => {
                 > -->
                 <Dialog>
                     <DialogTrigger as-child>
-                        <Button variant="outline" class="w-full">
-                            Create New Conversation
+                        <Button variant="outline" size="icon" class="ml-2">
+                            <UserPen class="w-4 h-4" />
                         </Button>
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-[425px]">
@@ -251,7 +272,7 @@ const updateLastActiveAt = async (id) => {
                 <!-- </Form> -->
             </div>
         </div>
-        <div class="flex flex-col mt-8">
+        <div class="flex flex-col mt-8"  v-show="!search">
             <div class="flex flex-row items-center justify-between text-xs">
                 <span class="font-bold">Online</span>
                 <!-- online count have to exclude current user count -->
@@ -358,7 +379,6 @@ const updateLastActiveAt = async (id) => {
                     </div>
                 </Link>
             </div>
-
             <!-- <div
                     class="flex flex-row items-center justify-between text-xs mt-6"
                 >
@@ -387,6 +407,46 @@ const updateLastActiveAt = async (id) => {
                         <div class="ml-2 text-sm font-semibold">Henry Boyd</div>
                     </button>
                 </div> -->
+        </div>
+        <div class="flex flex-col mt-8" v-show="search">
+            <div
+                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full  [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+            >
+                <div
+                    v-for="searchUser in searchUsers"
+                    class="rounded-xl"
+                    :key="searchUser.id"
+                >
+                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl">
+                        <div>
+                            <div
+                                class="flex flex-row items-center rounded-xl p-2"
+                            >
+                                <div
+                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                >
+                                    {{ searchUser.name[0] }}
+                                </div>
+                                <div class="ml-2 text-sm font-semibold">
+                                    {{ searchUser.name }}
+                                    <span
+                                        :class="
+                                            allOnlineUsers.find(
+                                                (u) =>
+                                                    u.id ==
+                                                    searchUser.id
+                                            )
+                                                ? 'bg-green-500'
+                                                : 'bg-red-400'
+                                        "
+                                        class="inline-block h-2 w-2 rounded-full"
+                                    ></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
