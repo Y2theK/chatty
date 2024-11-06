@@ -3,10 +3,24 @@
 #### Descript
 Chatty is small a real time messaging app providing seemless experience of chatting between friends and families. It includes features like messaging in private chat/ group chat, creating conversation, inviting new user to group, leave conversation, online/ offline user status, current active users in groups and even whisper typing event.
 
+
+- [x] Authentication
+- [x] Chatting in private and group conversation
+- [x] Easily Search users
+- [x] Create conversation and groups , invite or leave conversation
+- [x] Online , Offline status and last seen status
+- [x] Currently active users in groups
+- [x] Type whispering
+- [x] Profile management
+- [x] Responsive
+- [x] Message delete, forward and reply
+
+
 ### Tech Stacks:
 `Laravel 11` `sqlite` `vue 3` `laravel-reverb` `tailwindcss` `shadcn-vue` `inertia` `axios` `laravel-breeeze` `laravel-echo`
 
 ### Coming soon
+- Support Image, Video, emoji and links in conversation
 - Video Call & Audio Call
 
 ### Screenshots
