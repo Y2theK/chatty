@@ -21,7 +21,18 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    image: null
 });
+
+const submit = () => {
+    
+    form.post(route('profile.update'),{
+        _method: 'put',
+        image: form.image,
+        name: form.name,
+        email: form.email,
+    });
+}
 </script>
 
 <template>
@@ -42,7 +53,7 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="submit"
             class="mt-6 space-y-6"
         >
             <div>
@@ -95,6 +106,21 @@ const form = useForm({
                 >
                     A new verification link has been sent to your email address.
                 </div>
+            </div>
+
+            <div>
+                <InputLabel for="image" value="Image" />
+
+                <TextInput
+                    id="email"
+                    type="file"
+                    class="mt-1 block w-full"
+                    @input="form.image = $event.target.files[0]"
+                    
+                    autocomplete="username"
+                />
+
+                <InputError class="mt-2" :message="form.errors.image" />
             </div>
 
             <div class="flex items-center gap-4">

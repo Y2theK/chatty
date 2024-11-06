@@ -164,15 +164,22 @@ const fetchUsers = async () => {
             <div class="ml-2 font-bold text-2xl">Chatty</div>
         </Link>
         <div
-            class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
+            class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg " 
         >
-            <div class="h-20 w-20 rounded-full border overflow-hidden">
+            <div class="h-20 w-20 rounded-full border overflow-hidden" v-if="$page.props.auth.user.image">
                 <img
-                    src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    :src="$page.props.auth.user.image"
                     alt="Avatar"
                     class="h-full w-full"
                 />
+               
             </div>
+            <div
+                class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" v-else
+            >
+                {{ $page.props.auth.user.name[0] }}
+            </div>
+            
             <div class="text-sm font-semibold mt-2">
                 {{ $page.props.auth.user.name }}
             </div>

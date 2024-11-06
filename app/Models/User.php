@@ -23,7 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'last_active_at'
+        'last_active_at',
+        'image'
     ];
 
     protected $likeFilterFields = [
