@@ -56,6 +56,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getImageAttribute($value)
+    {
+        return $value ? asset($value) : null;
+    }
     public function chats() : HasMany
     {
         return $this->hasMany(Chat::class);

@@ -298,11 +298,17 @@ onBeforeUnmount(() => {
                         <div
                             class="flex items-center justify-start flex-row-reverse"
                         >
-                            <div
+                            <img  v-if="message.user.image"
+                                :src="message.user.image"
+                                alt="Avatar"
+                                class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                            />
+                            <div v-else
                                 class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
                             >
                                 {{ message.user.name[0] }}
                             </div>
+                            
                             <div :id="'message-'+message.id"
                                 class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between group"
                             >
@@ -316,7 +322,12 @@ onBeforeUnmount(() => {
                     </div>
                     <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>
                         <div class="flex flex-row items-center">
-                            <div
+                            <img  v-if="message.user.image"
+                                :src="message.user.image"
+                                alt="Avatar"
+                                class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                            />
+                            <div v-else
                                 class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
                             >
                                 {{ message.user.name[0] }}

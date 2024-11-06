@@ -8,7 +8,7 @@ class ConversationService
 {
     public function getuserConversation(User $user) 
     {
-        $conversations = $user->conversations()->with('users:id,name,last_active_at')->get();
+        $conversations = $user->conversations()->with('users:id,name,last_active_at,image')->get();
         return $conversations;
     }
 }

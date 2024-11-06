@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/vue3";
 import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { Search, UserPen } from "lucide-vue-next";
+import { PlusSquareIcon, Search, UserPen } from "lucide-vue-next";
 
 import {
     Dialog,
@@ -228,7 +228,7 @@ const fetchUsers = async () => {
                 <Dialog>
                     <DialogTrigger as-child>
                         <Button variant="outline" size="icon" class="ml-2">
-                            <UserPen class="w-4 h-4" />
+                            <PlusSquareIcon class="w-4 h-4" />
                         </Button>
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-[425px]">
@@ -318,11 +318,17 @@ const fetchUsers = async () => {
                                 v-if="!conversation.is_group"
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
-                                <div
+                                <img  v-if="conversation.users[0].image"
+                                    :src="conversation.users[0].image"
+                                    alt="Avatar"
+                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                />
+                                <div v-else
                                     class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
                                 >
                                     {{ conversation.users[0].name[0] }}
                                 </div>
+                               
                                 <div class="ml-2 text-sm font-semibold">
                                     {{ conversation.users[0].name }}
                                     <span
@@ -356,7 +362,12 @@ const fetchUsers = async () => {
                                     ) in conversation.users.slice(0, 5)"
                                     :key="user.id"
                                 >
-                                    <div
+                                    <img  v-if="user.image"
+                                        :src="user.image"
+                                        alt="Avatar"
+                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                    />
+                                    <div v-else
                                         :class="
                                             groupColors[
                                                 index % groupColors.length
@@ -366,6 +377,8 @@ const fetchUsers = async () => {
                                     >
                                         {{ user.name[0] }}
                                     </div>
+
+
                                 </div>
                                 <div class="ml-2 text-sm font-semibold">
                                     <span v-if="conversation.name">

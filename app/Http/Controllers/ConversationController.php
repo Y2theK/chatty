@@ -39,12 +39,12 @@ class ConversationController extends Controller
         $user = auth()->user();
         $conversations = $this->conversationService->getuserConversation($user);
       
-        $messages = ChatMessage::with('user:id,name')->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
+        $messages = ChatMessage::with('user:id,name,image')->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
         // dd($messages,MessageResource::collection($messages));
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
-            'conversation' => $conversation->load('users:id,name,last_active_at')
+            'conversation' => $conversation->load('users:id,name,last_active_at,image')
         ]);
     }
 
