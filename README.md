@@ -7,11 +7,7 @@ Chatty is small a real time messaging app providing seemless experience of chatt
 `Laravel 11` `sqlite` `vue 3` `laravel-reverb` `tailwindcss` `shadcn-vue` `inertia` `axios` `laravel-breeeze` `laravel-echo`
 
 ### Coming soon
-- Support Image, Video, emoji and links in conversation
-- Authorization in group and private chats
-- Message delete and reply
-- Status Sharing
-- Profile Image Upload
+- Video Call & Audio Call
 
 ### Screenshots
 

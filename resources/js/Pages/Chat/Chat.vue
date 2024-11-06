@@ -179,8 +179,8 @@ onBeforeUnmount(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="flex items-center justify-between border-b py-4 ">
-            <div class="flex items-center ">
+        <div class="justify-between border-b py-4 flex flex-col md:flex-row">
+            <div class="flex items-center">
                 <Link :href="route('dashboard')">
                     <Button variant="outline" size="icon">
                         <ChevronLeft class="w-4 h-4" />
@@ -238,8 +238,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
             </div>
-            <div class="mx-4 flex items-center gap-2" >
-              
+            <div class="mx-14 md:mx-4 mt-1 flex items-center gap-2" >
                 <Dialog>
                     <DialogTrigger as-child>
                         <Button variant="outline">  <Plus class="w-4 h-4" />Add</Button>
