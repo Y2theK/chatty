@@ -62,11 +62,7 @@ class ConversationController extends Controller
     }
     public function store(Request $request,Conversation $conversation)
     {
-        $message = ChatMessage::create([
-            'user_id' => auth()->id(),
-            'conversation_id' => $conversation->id,
-            'message' => $request->input('message')
-        ]);
+        $message = $this->createMessage(auth()->user(),$conversation,$request->message);
 
         broadcast(new ChatMessageSent($message->load('user:id,name')));
 
@@ -76,77 +72,115 @@ class ConversationController extends Controller
 
     public function updateLastActiveAt(Request $request)
     {
-        // $user = User::where('id',$id)->first();
+
         auth()->user()->update([
             'last_active_at' => now()
         ]);
-        // dd(auth()->user());
-
-        // broadcast(new ChatMessageSent($message->load('user:id,name')));
 
         return response()->json([
             'success' => true,
-            'message' => "Updated Last Active"
+            'message' => "Updated Last Active At."
         ]);
+    }
+
+    protected function createMessage(User $user,Conversation $conversation,string $message)
+    {
+
+        $chatMessage = ChatMessage::create([
+            'user_id' => $user->id,
+            'conversation_id' => $conversation->id,
+            'message' => $message
+        ]);
+
+        return $chatMessage;
+    }
+
+    protected function createConversationUser(User $user,Conversation $conversation)
+    {
+        $conversationUser = ConversationUser::create([
+            'user_id' => $user->id,
+            'conversation_id' => $conversation->id
+        ]);
+
+        return $conversationUser;
     }
 
     public function createConversation(Request $request)
     {
-        $user = User::where('email',$request->email)->first();;
+        $user = User::where('email',$request->email)->first();
 
-        if($user && $user !== auth()->user()){
-
-            $conversation = Conversation::create([
-                'name' => fake()->emoji()
-            ]);
-
-            ConversationUser::firstOrCreate([
-                'user_id' => $user->id,
-                'conversation_id' => $conversation->id
-            ]);
-
-            ConversationUser::firstOrCreate([
-                'user_id' => auth()->id(),
-                'conversation_id' => $conversation->id
-            ]);
-
-            ChatMessage::create([
-                'user_id' => auth()->id(),
-                'conversation_id' => $conversation->id,
-                'message' => $request->message
-            ]);
-            // boradcase noti
-
+        if($user && $user == auth()->user()){
             return response()->json([
                 'success' => true,
-                'redirect' => route('conversations.show',$conversation)
+                'redirect' => route('dashboard')
             ]);
         }
 
+        $authUserConversation = auth()->user()->conversations->where('is_group',false)->pluck('id')->toArray();
+
+        $userConversation = $user->conversations->where('is_group',false)->pluck('id')->toArray();
+
+        $isAlreadyHaveConversation = array_values(array_intersect($authUserConversation,$userConversation));
+
+        if($isAlreadyHaveConversation){
+
+            $alreadyConversation = Conversation::where('id',$isAlreadyHaveConversation[0])->first();
+
+            if($request->message){
+               $this->createMessage(auth()->user(),$alreadyConversation,$request->message);
+            }
+
+                // boradcase noti
+            return response()->json([
+                'success' => true,
+                'redirect' => route('conversations.show',$alreadyConversation)
+            ]);
+        }
+                                                        
+        $conversation = Conversation::create([
+            'name' => fake()->emoji()
+        ]);
+
+        $this->createConversationUser($user,$conversation);
+        $this->createConversationUser(auth()->user(),$conversation);
+
+        if($request->message){
+            $this->createMessage(auth()->user(),$conversation,$request->message);
+        }
+        
+
+        // boradcase noti
+
         return response()->json([
             'success' => true,
-            'redirect' => route('dashboard')
-        ]);
+            'redirect' => route('conversations.show',$conversation)
+        ]);    
+
     }
 
     public function addGroup(Conversation $conversation,Request $request)
     {
-        $user = User::where('email',$request->email)->first();;
+        $user = User::where('email',$request->email)->first();
 
-        if($user){
-            ConversationUser::firstOrCreate([
-                'user_id' => $user->id,
-                'conversation_id' => $conversation->id
-            ]);
-            // boradcase noti
+        if(!$user){
             return response()->json([
                 'success' => true,
-                'redirect' => route('conversations.show',$conversation)
+                'redirect' => route('dashboard')
             ]);
         }
+
+        $conversation->update([
+                'is_group' => true,
+                'name' => $conversation->name ?? fake()->emoji()
+        ]);
+
+        $this->createConversationUser($user,$conversation);
+
+        // boradcase noti
+
         return response()->json([
             'success' => true,
-            'redirect' => route('dashboard')
+            'redirect' => route('conversations.show',$conversation)
         ]);
       
     }

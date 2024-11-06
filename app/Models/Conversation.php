@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Conversation extends Model
 {
     protected $fillable = [
-        'name'
+        'name',
+        'is_group'
     ];
     public function allUsers() : BelongsToMany
     {

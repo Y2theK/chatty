@@ -43,16 +43,20 @@ const form = useForm({
     validationSchema: formSchema,
 });
 
-const onSubmit = form.handleSubmit(async (values) => {
+const createConversation = async (email,message) => {
     try {
         const response = await axios.post(`/conversations/create`, {
-            email: values.email,
-            message: values.message,
+            email: email,
+            message: message,
         });
         window.location.href = response.data.redirect;
     } catch (error) {
         console.error("Failed to send message:", error);
     }
+}
+
+const onSubmit = form.handleSubmit(async (values) => {
+    await createConversation({ email:values.email,message:values.message })
 });
 
 
@@ -119,7 +123,7 @@ const fetchUsers = async () => {
 
     try {
         // Use axios.get with params as the second argument
-        const response = await axios.get('users', { params });
+        const response = await axios.get(route('users.index'), { params });
 
         console.log(response, search.value);
         searchUsers.value = response.data;
@@ -414,10 +418,10 @@ const fetchUsers = async () => {
             >
                 <div
                     v-for="searchUser in searchUsers"
-                    class="rounded-xl"
+                    class="rounded-xl cursor-pointer"
                     :key="searchUser.id"
                 >
-                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl">
+                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl" @click="createConversation(searchUser.email)">
                         <div>
                             <div
                                 class="flex flex-row items-center rounded-xl p-2"

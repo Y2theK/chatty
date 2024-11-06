@@ -64,5 +64,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Conversation::class)->distinct();
     }
+
+    public function groups() : BelongsToMany
+    {
+        return $this->belongsToMany(Conversation::class)->distinct();
+    }
     
 }
