@@ -13,6 +13,7 @@ use App\Events\ChatMessageSent;
 use App\Models\ConversationUser;
 use App\Services\ConversationService;
 use App\Http\Resources\MessageResource;
+use App\Services\ChatMessageService;
 
 class ConversationController extends Controller
 {
@@ -47,65 +48,7 @@ class ConversationController extends Controller
         ]);
     }
 
-    public function deleteMessage(Conversation $conversation,ChatMessage $message)
-    {
-        $message = ChatMessage::where([
-            'user_id' => auth()->id(),
-            'conversation_id' => $conversation->id,
-            'id' => $message->id
-        ])->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => "Deleted Message"
-        ]);
-    }
-    public function store(Request $request,Conversation $conversation)
-    {
-        $message = $this->createMessage(auth()->user(),$conversation,$request->message);
-
-        broadcast(new ChatMessageSent($message->load('user:id,name')));
-
-        return redirect()->route('conversations.show',$conversation);
-        // return response()->json($message);
-    }
-
-    public function updateLastActiveAt(Request $request)
-    {
-
-        auth()->user()->update([
-            'last_active_at' => now()
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Updated Last Active At."
-        ]);
-    }
-
-    protected function createMessage(User $user,Conversation $conversation,string $message)
-    {
-
-        $chatMessage = ChatMessage::create([
-            'user_id' => $user->id,
-            'conversation_id' => $conversation->id,
-            'message' => $message
-        ]);
-
-        return $chatMessage;
-    }
-
-    protected function createConversationUser(User $user,Conversation $conversation)
-    {
-        $conversationUser = ConversationUser::create([
-            'user_id' => $user->id,
-            'conversation_id' => $conversation->id
-        ]);
-
-        return $conversationUser;
-    }
-
-    public function createConversation(Request $request)
+    public function createConversation(Request $request,ChatMessageService $chatMessageService)
     {
         $user = User::where('email',$request->email)->first();
 
@@ -126,8 +69,9 @@ class ConversationController extends Controller
 
             $alreadyConversation = Conversation::where('id',$isAlreadyHaveConversation[0])->first();
 
+            // dd($alreadyConversation,$request->message);
             if($request->message){
-               $this->createMessage(auth()->user(),$alreadyConversation,$request->message);
+               $chatMessageService->createMessage(auth()->user(),$alreadyConversation,$request->message);
             }
 
                 // boradcase noti
@@ -145,10 +89,9 @@ class ConversationController extends Controller
         $this->createConversationUser(auth()->user(),$conversation);
 
         if($request->message){
-            $this->createMessage(auth()->user(),$conversation,$request->message);
+            $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
         }
         
-
         // boradcase noti
 
         return response()->json([
@@ -170,8 +113,8 @@ class ConversationController extends Controller
         }
 
         $conversation->update([
-                'is_group' => true,
-                'name' => $conversation->name ?? fake()->emoji()
+            'is_group' => true,
+            'name' => $conversation->name ?? fake()->emoji()
         ]);
 
         $this->createConversationUser($user,$conversation);
@@ -187,13 +130,23 @@ class ConversationController extends Controller
     public function leaveConversation(Conversation $conversation,Request $request)
     {
 
-            ConversationUser::where('user_id',auth()->id())->where('conversation_id',$conversation->id)->delete();
-           
-            // boradcase noti
-            return response()->json([
-                'success' => true,
-                'redirect' => route('dashboard')
-            ]);      
+        ConversationUser::where('user_id',auth()->id())->where('conversation_id',$conversation->id)->delete();
+        
+        // boradcase noti
+        return response()->json([
+            'success' => true,
+            'redirect' => route('dashboard')
+        ]);      
+    }
+
+    protected function createConversationUser(User $user,Conversation $conversation)
+    {
+        $conversationUser = ConversationUser::create([
+            'user_id' => $user->id,
+            'conversation_id' => $conversation->id
+        ]);
+
+        return $conversationUser;
     }
    
 }

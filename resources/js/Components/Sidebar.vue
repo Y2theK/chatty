@@ -45,6 +45,7 @@ const form = useForm({
 
 const createConversation = async (email,message) => {
     try {
+        
         const response = await axios.post(`/conversations/create`, {
             email: email,
             message: message,
@@ -56,7 +57,8 @@ const createConversation = async (email,message) => {
 }
 
 const onSubmit = form.handleSubmit(async (values) => {
-    await createConversation({ email:values.email,message:values.message })
+    
+    await createConversation(values.email, values.message)
 });
 
 
@@ -306,7 +308,7 @@ const fetchUsers = async () => {
                     <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl">
                         <div>
                             <div
-                                v-if="conversation.users.length === 1"
+                                v-if="!conversation.is_group"
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
                                 <div

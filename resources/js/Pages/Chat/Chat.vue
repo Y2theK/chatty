@@ -42,7 +42,7 @@ const form = useForm({
 
 const submit = () => {
     if (form.message) {
-        form.post(route("conversations.store", props.conversation.id), {
+        form.post(route("messages.store", props.conversation.id), {
             message: form.message,
             onFinish: () => (form.message = ""),
         });
@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
                 <div>
                     <div
                         class="flex items-center bg-gray-100 rounded-xl px-4"
-                        v-if="users.length === 1"
+                        v-if="!conversation.is_group"
                     >
                         <div class="text-lg font-semibold mr-2 p-2 rounded">
                            <div>

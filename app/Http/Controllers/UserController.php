@@ -13,4 +13,17 @@ class UserController extends Controller
 
         return $users;
     }
+
+    public function updateLastActiveAt(Request $request)
+    {
+
+        auth()->user()->update([
+            'last_active_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Updated Last Active At."
+        ]);
+    }
 }
