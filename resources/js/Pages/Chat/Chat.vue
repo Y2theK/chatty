@@ -18,9 +18,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-// import { UserRoundPen,UserPen } from "lucide-vue-next";
 import moment from "moment";
 import axios from "axios";
+import { VueChatEmojiComponent } from "@nguyenvanlong/vue3-chat-emoji";
+import "@nguyenvanlong/vue3-chat-emoji/dist/index.mjs.css";
 
 const props = defineProps({
     conversations: {
@@ -49,6 +50,31 @@ const typingUserName = ref("");
 const isUserTypingTimer = ref(null);
 
 const users = ref([...props.conversation.users]);
+
+const open = ref(false);
+
+const cursorPosition = ref(0);
+const textInput = ref(null);
+
+const updateCursorPosition = (event) => {
+    cursorPosition.value = event.target.selectionStart;
+};
+
+const selectedEmoji = async (args) => {
+    
+    const input = textInput.value;    
+    const emoji = args.unicode;
+    const before = form.message.slice(0, cursorPosition.value);
+    const after =  form.message.slice(cursorPosition.value);
+    form.message = before + emoji + after;
+    console.log(args);
+    
+    // Update cursor position after emoji insertion
+    await nextTick();
+    cursorPosition.value += emoji.length;
+    input.setSelectionRange(cursorPosition.value, cursorPosition.value);
+    input.focus();
+};
 
 const submit = () => {
     if (form.message) {
@@ -175,7 +201,7 @@ onBeforeUnmount(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="justify-between border-b py-4 flex flex-col md:flex-row">
+        <div class="justify-between border-b py-4 flex flex-col md:flex-row ">
             <div class="flex items-center">
                 <Link :href="route('dashboard')">
                     <Button variant="outline" size="icon">
@@ -371,18 +397,25 @@ onBeforeUnmount(() => {
                 @submit.prevent="submit"
                 class="flex justify-center items-center flex-grow"
             >
+          
                 <div class="ml-4 flex-grow">
-                    <div class="relative w-full">
+                    
+                    <div class="relative w-full py-2">
+                        
                         <input
                             type="text"
                             class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
                             v-model="form.message"
-                            required
+                            ref="textInput" 
                             @keydown="sendTypingEvent"
+                            @click="updateCursorPosition" 
+                            @keyup="updateCursorPosition"
                         />
-                        <button
-                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
-                        >
+                     
+                        <button type="button"
+                           @click="open = !open"
+                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"   
+                        >                       
                             <svg
                                 class="w-6 h-6"
                                 fill="none"
@@ -396,14 +429,22 @@ onBeforeUnmount(() => {
                                     stroke-width="2"
                                     d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                 ></path>
-                            </svg>
-                        </button>
+                            </svg> 
+                        </button> 
                     </div>
+                   
                     <small v-if="isUserTyping" class="text-gray-600 mt-5">
                         {{ typingUserName }} is typing...
                     </small>
                 </div>
-                <div class="ml-4">
+                <div class="ml-4 relative">
+                    <VueChatEmojiComponent
+                            :open="open"
+                            v-if="open"
+                        width="280px"
+                        @handle="selectedEmoji"
+                        class="grid place-items-end"
+                    />
                     <button
                         class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-2 flex-shrink-0"
                     >
@@ -425,8 +466,11 @@ onBeforeUnmount(() => {
                             </svg>
                         </span>
                     </button>
+                    
                 </div>
+              
             </form>
+        
         </div>
     </Dashboard>
 </template>
