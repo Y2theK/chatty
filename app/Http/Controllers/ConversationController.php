@@ -44,7 +44,7 @@ class ConversationController extends Controller
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
-            'conversation' => $conversation->load('users:id,name,last_active_at,image')
+            'conversation' => $conversation->load(['users:id,name,last_active_at,image','latestMessage'])
         ]);
     }
 

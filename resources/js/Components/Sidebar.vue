@@ -208,7 +208,7 @@ const fetchUsers = async () => {
         </div>
         <div class="flex justify-center items-center">
             <div class="relative w-full max-w-sm items-center mt-2  ">
-                <Input id="search" type="text" placeholder="Search..." class="pl-10" v-model="search" @keyup="fetchUsers"/>
+                <Input id="search" type="text" placeholder="Search..." class="pl-10 focus-visible:ring-0 focus-visible:ring-offset-0" v-model="search" @keyup="fetchUsers"/>
                 <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
                 <Search class="size-6 text-muted-foreground" />
                 </span>
@@ -324,8 +324,9 @@ const fetchUsers = async () => {
                                     {{ conversation.users[0].name[0] }}
                                 </div>
                                
-                                <div class="ml-2 text-sm font-semibold">
-                                    {{ conversation.users[0].name }}
+                                <div class="ml-2">
+                                    <span class="text-sm font-semibold">{{ conversation.users[0].name }}</span>
+                                    
                                     <span
                                         :class="
                                             allOnlineUsers.find(
@@ -336,8 +337,9 @@ const fetchUsers = async () => {
                                                 ? 'bg-green-500'
                                                 : 'bg-red-400'
                                         "
-                                        class="inline-block h-2 w-2 rounded-full"
+                                        class="inline-block h-2 w-2 rounded-full ml-2"
                                     ></span>
+                                    <small class="flex" v-if="conversation.latest_message">{{ conversation.latest_message.message }}</small>
                                 </div>
                             </div>
                             <div
@@ -375,8 +377,9 @@ const fetchUsers = async () => {
 
 
                                 </div>
-                                <div class="ml-2 text-sm font-semibold">
-                                    <span v-if="conversation.name">
+                                <div class="ml-2">
+                                    <span v-if="conversation.name" class="text-sm font-semibold">
+
                                         {{ conversation.name?.toUpperCase() }}
                                     </span>
                                     <span
@@ -391,7 +394,7 @@ const fetchUsers = async () => {
                                         "
                                         class="inline-block h-2 w-2 rounded-full ml-2"
                                     ></span>
-                                    
+                                    <small class="flex" v-if="conversation.latest_message">{{ conversation.latest_message.message }}</small>
                                 </div>
                                
                             </div>

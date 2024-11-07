@@ -27,7 +27,7 @@ class ChatMessageController extends Controller
     {
         $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
 
-        broadcast(new ChatMessageSent($message->load('user:id,name')));
+        broadcast(new ChatMessageSent($message->load('user:id,name,image')));
 
         return redirect()->route('conversations.show',$conversation);
         // return response()->json($message);
