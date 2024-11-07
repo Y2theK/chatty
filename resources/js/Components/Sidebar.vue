@@ -77,7 +77,6 @@ onMounted(() => {
 });
 
 onBeforeMount(() => {
-         
     window.Echo.leave(`online`, (user) => {
         allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
     });
@@ -85,15 +84,14 @@ onBeforeMount(() => {
 
 onUnmounted(() => {
     updateLastActiveAt();
-})
-
-const onSubmit = form.handleSubmit(async (values) => {
-    await createConversation(values.email, values.message)
 });
 
-const createConversation = async (email,message) => {
+const onSubmit = form.handleSubmit(async (values) => {
+    await createConversation(values.email, values.message);
+});
+
+const createConversation = async (email, message) => {
     try {
-        
         const response = await axios.post(`/conversations/create`, {
             email: email,
             message: message,
@@ -102,25 +100,23 @@ const createConversation = async (email,message) => {
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-}
+};
 
 const updateLastActiveAt = async (id) => {
     try {
-        const response = await axios.post(
-            `/users/updateLastActiveAt`
-        );
+        const response = await axios.post(`/users/updateLastActiveAt`);
         // window.location.href = response.data.redirect;
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-}
+};
 
 const fetchUsers = async () => {
     const params = { search: search.value }; // Set params
 
     try {
         // Use axios.get with params as the second argument
-        const response = await axios.get(route('users.index'), { params });
+        const response = await axios.get(route("users.index"), { params });
 
         console.log(response, search.value);
         searchUsers.value = response.data;
@@ -159,22 +155,25 @@ const fetchUsers = async () => {
             <div class="ml-2 font-bold text-2xl">Chatty</div>
         </Link>
         <div
-            class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg " 
+            class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
         >
-            <div class="h-20 w-20 rounded-full border overflow-hidden" v-if="$page.props.auth.user.image">
+            <div
+                class="h-20 w-20 rounded-full border overflow-hidden"
+                v-if="$page.props.auth.user.image"
+            >
                 <img
                     :src="$page.props.auth.user.image"
                     alt="Avatar"
                     class="h-full w-full"
                 />
-               
             </div>
             <div
-                class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full" v-else
+                class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                v-else
             >
                 {{ $page.props.auth.user.name[0] }}
             </div>
-            
+
             <div class="text-sm font-semibold mt-2">
                 {{ $page.props.auth.user.name }}
             </div>
@@ -207,10 +206,19 @@ const fetchUsers = async () => {
             </div>
         </div>
         <div class="flex justify-center items-center">
-            <div class="relative w-full max-w-sm items-center mt-2  ">
-                <Input id="search" type="text" placeholder="Search..." class="pl-10 focus-visible:ring-0 focus-visible:ring-offset-0" v-model="search" @keyup="fetchUsers"/>
-                <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-                <Search class="size-6 text-muted-foreground" />
+            <div class="relative w-full max-w-sm items-center mt-2">
+                <Input
+                    id="search"
+                    type="text"
+                    placeholder="Search..."
+                    class="pl-10 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    v-model="search"
+                    @keyup="fetchUsers"
+                />
+                <span
+                    class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
+                >
+                    <Search class="size-6 text-muted-foreground" />
                 </span>
             </div>
             <div class="mt-2 flex justify-center">
@@ -266,7 +274,8 @@ const fetchUsers = async () => {
                                 </FormItem>
                             </FormField>
                             <DialogFooter>
-                                <Button class="mt-2"
+                                <Button
+                                    class="mt-2"
                                     type="submit"
                                     @click="onSubmit"
                                     form="dialogForm"
@@ -280,7 +289,7 @@ const fetchUsers = async () => {
                 <!-- </Form> -->
             </div>
         </div>
-        <div class="flex flex-col mt-8"  v-show="!search">
+        <div class="flex flex-col mt-8" v-show="!search">
             <div class="flex flex-row items-center justify-between text-xs">
                 <span class="font-bold">Online</span>
                 <!-- online count have to exclude current user count -->
@@ -294,7 +303,7 @@ const fetchUsers = async () => {
                 >
             </div>
             <div
-                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full  [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             >
                 <Link
                     :href="route('conversations.show', conversation.id)"
@@ -307,26 +316,27 @@ const fetchUsers = async () => {
                     class="rounded-xl"
                     :key="conversation.id"
                 >
-                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl">
+                    <div
+                        class="flex justify-between items-center hover:bg-gray-100 rounded-xl"
+                    >
                         <div>
                             <div
                                 v-if="!conversation.is_group"
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
-                                <img  v-if="conversation.users[0].image"
-                                    :src="conversation.users[0].image"
-                                    alt="Avatar"
-                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                />
-                                <div v-else
-                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                >
-                                    {{ conversation.users[0].name[0] }}
-                                </div>
-                               
-                                <div class="ml-2">
-                                    <span class="text-sm font-semibold">{{ conversation.users[0].name }}</span>
-                                    
+                                <div class="relative">
+                                    <img
+                                        v-if="conversation.users[0].image"
+                                        :src="conversation.users[0].image"
+                                        alt="Avatar"
+                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                    >
+                                        {{ conversation.users[0].name[0] }}
+                                    </div>
                                     <span
                                         :class="
                                             allOnlineUsers.find(
@@ -337,121 +347,140 @@ const fetchUsers = async () => {
                                                 ? 'bg-green-500'
                                                 : 'bg-red-400'
                                         "
-                                        class="inline-block h-2 w-2 rounded-full ml-2"
+                                        class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
                                     ></span>
-                                    <small class="flex" v-if="conversation.latest_message">{{ conversation.latest_message.message }}</small>
+                                </div>
+
+                                <div class="ml-2">
+                                    <span class="text-sm font-semibold">{{
+                                        conversation.users[0].name
+                                    }}</span>
+                                    <small
+                                        class="flex"
+                                        v-if="conversation.latest_message"
+                                        >{{
+                                            conversation.latest_message.message
+                                        }}</small
+                                    >
                                 </div>
                             </div>
-                            <div
-                                v-else
-                                class="flex flex-row items-center  p-2"
-                            >
-                                <div
+                            <div v-else class="flex flex-row items-center p-2">
+                                <!-- <div
                                     class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
                                 >
                                     {{
                                         $page.props.auth.user.name[0].toUpperCase()
                                     }}
+                                </div> -->
+                                <div class="relative">
+                                    <img
+                                        v-if="$page.props.auth.user.image"
+                                        :src="$page.props.auth.user.image"
+                                        alt="Avatar"
+                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                    >
+                                        {{ $page.props.auth.user.name[0].toUpperCase() }}
+                                    </div>
+                                    <span
+                                        :class="
+                                            allOnlineUsers.find(
+                                                (u) =>
+                                                    u.id ==
+                                                    $page.props.auth.user.id
+                                            )
+                                                ? 'bg-green-500'
+                                                : 'bg-red-400'
+                                        "
+                                        class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
+                                    ></span>
                                 </div>
-                                <div class=""
+                                <div
+                                    class=""
                                     v-for="(
                                         user, index
                                     ) in conversation.users.slice(0, 5)"
                                     :key="user.id"
                                 >
-                                    <img  v-if="user.image"
-                                        :src="user.image"
-                                        alt="Avatar"
-                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                    />
-                                    <div v-else
-                                        :class="
-                                            groupColors[
-                                                index % groupColors.length
-                                            ]
-                                        "
-                                        class="flex items-center justify-center -ml-3 h-8 w-8 rounded-full"
-                                    >
-                                        {{ user.name[0] }}
+                                    <div class="relative">
+                                        <img
+                                            v-if="user.image"
+                                            :src="user.image"
+                                            alt="Avatar"
+                                            class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                        />
+                                        <div
+                                            v-else
+                                            :class="
+                                                groupColors[
+                                                    index % groupColors.length
+                                                ]
+                                            "
+                                            class="flex items-center justify-center h-8 w-8 -ml-1 rounded-full"
+                                        >
+                                            {{ user.name[0] }}
+                                        </div>
+                                        <span
+                                            :class="
+                                                allOnlineUsers.find(
+                                                    (u) => u.id == user.id
+                                                )
+                                                    ? 'bg-green-500'
+                                                    : 'bg-red-400'
+                                            "
+                                            class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 left-3 border-2 border-white"
+                                        ></span>
                                     </div>
-
-
                                 </div>
                                 <div class="ml-2">
-                                    <span v-if="conversation.name" class="text-sm font-semibold">
-
-                                        {{ conversation.name?.toUpperCase() }}
-                                    </span>
                                     <span
-                                        :class="
-                                            allOnlineUsers.find((u) =>
-                                                conversation.users.find(
-                                                    (c) => c.id == u.id
-                                                )
-                                            )
-                                                ? 'bg-green-500'
-                                                : 'bg-red-400'
-                                        "
-                                        class="inline-block h-2 w-2 rounded-full ml-2"
-                                    ></span>
-                                    <small class="flex" v-if="conversation.latest_message">{{ conversation.latest_message.message }}</small>
+                                        v-if="conversation.name"
+                                        class="text-sm font-semibold"
+                                    >
+                                        {{ conversation.name?.toUpperCase() }}
+                                    </span> 
+                                    <small
+                                        class="flex"
+                                        v-if="conversation.latest_message"
+                                        >{{
+                                            conversation.latest_message.message
+                                        }}</small
+                                    >
                                 </div>
-                               
                             </div>
                         </div>
-                      
                     </div>
                 </Link>
             </div>
-            <!-- <div
-                    class="flex flex-row items-center justify-between text-xs mt-6"
-                >
-                  <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                    <span class="font-bold">Offline</span>
-                    <span
-                        class="flex items-center justify-center bg-gray-300 h-4 w-4 rounded-full"
-                        >7</span
-                    >
-                </div>
-                <div class="flex flex-col space-y-1 mt-4 -mx-2">
-                    <button
-                        class="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
-                    >
-                        <div
-                            class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                        >
-                            H
-                        </div>
-                        <div class="ml-2 text-sm font-semibold">Henry Boyd</div>
-                    </button>
-                </div> -->
         </div>
         <div class="flex flex-col mt-8" v-show="search">
             <div
-                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full  [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
+                class="flex flex-col space-y-1 mt-4 -mx-2 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             >
                 <div
                     v-for="searchUser in searchUsers"
                     class="rounded-xl cursor-pointer"
                     :key="searchUser.id"
                 >
-                    <div class="flex justify-between items-center hover:bg-gray-100 rounded-xl" @click="createConversation(searchUser.email)">
+                    <div
+                        class="flex justify-between items-center hover:bg-gray-100 rounded-xl"
+                        @click="createConversation(searchUser.email)"
+                    >
                         <div>
                             <div
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
-                                <img  v-if="searchUser.image"
-                                        :src="searchUser.image"
-                                        alt="Avatar"
-                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                <img
+                                    v-if="searchUser.image"
+                                    :src="searchUser.image"
+                                    alt="Avatar"
+                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
                                 />
-                                <div v-else
+                                <div
+                                    v-else
                                     class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
                                 >
                                     {{ searchUser.name[0] }}
@@ -461,9 +490,7 @@ const fetchUsers = async () => {
                                     <span
                                         :class="
                                             allOnlineUsers.find(
-                                                (u) =>
-                                                    u.id ==
-                                                    searchUser.id
+                                                (u) => u.id == searchUser.id
                                             )
                                                 ? 'bg-green-500'
                                                 : 'bg-red-400'

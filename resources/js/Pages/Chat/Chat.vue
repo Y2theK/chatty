@@ -319,15 +319,32 @@ onBeforeUnmount(() => {
                         <div
                             class="flex items-center justify-start flex-row-reverse"
                         >
-                            <img  v-if="message.user.image"
-                                :src="message.user.image"
-                                alt="Avatar"
-                                class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                            />
-                            <div v-else
-                                class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
-                            >
-                                {{ message.user.name[0] }}
+
+                            <div class="relative">
+                                <img
+                                    v-if="message.user.image"
+                                    :src="message.user.image"
+                                    alt="Avatar"
+                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                />
+                                <div
+                                    v-else
+                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                >
+                                    {{ message.user.name[0] }}
+                                </div>
+                                <span
+                                    :class="
+                                        onlineUsers.find(
+                                            (u) =>
+                                                u.id ==
+                                                message.user.id
+                                        )
+                                            ? 'bg-green-500'
+                                            : 'bg-red-400'
+                                    "
+                                    class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
+                                ></span>
                             </div>
                             
                             <div :id="'message-'+message.id"
@@ -343,15 +360,31 @@ onBeforeUnmount(() => {
                     </div>
                     <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>
                         <div class="flex flex-row items-center">
-                            <img  v-if="message.user.image"
-                                :src="message.user.image"
-                                alt="Avatar"
-                                class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                            />
-                            <div v-else
-                                class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 flex-shrink-0"
-                            >
-                                {{ message.user.name[0] }}
+                            <div class="relative">
+                                <img
+                                    v-if="message.user.image"
+                                    :src="message.user.image"
+                                    alt="Avatar"
+                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                />
+                                <div
+                                    v-else
+                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                >
+                                    {{ message.user.name[0] }}
+                                </div>
+                                <span
+                                    :class="
+                                        onlineUsers.find(
+                                            (u) =>
+                                                u.id ==
+                                                message.user.id
+                                        )
+                                            ? 'bg-green-500'
+                                            : 'bg-red-400'
+                                    "
+                                    class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
+                                ></span>
                             </div>
                             <div
                                 class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl"
