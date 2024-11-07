@@ -43,25 +43,6 @@ const form = useForm({
     validationSchema: formSchema,
 });
 
-const createConversation = async (email,message) => {
-    try {
-        
-        const response = await axios.post(`/conversations/create`, {
-            email: email,
-            message: message,
-        });
-        window.location.href = response.data.redirect;
-    } catch (error) {
-        console.error("Failed to send message:", error);
-    }
-}
-
-const onSubmit = form.handleSubmit(async (values) => {
-    
-    await createConversation(values.email, values.message)
-});
-
-
 const props = defineProps({
     conversations: {
         required: true,
@@ -77,6 +58,8 @@ const groupColors = [
 ];
 
 const allOnlineUsers = ref([]);
+const searchUsers = ref([]);
+const search = ref(null);
 
 onMounted(() => {
     window.Echo.join(`online`)
@@ -104,22 +87,34 @@ onUnmounted(() => {
     updateLastActiveAt();
 })
 
+const onSubmit = form.handleSubmit(async (values) => {
+    await createConversation(values.email, values.message)
+});
+
+const createConversation = async (email,message) => {
+    try {
+        
+        const response = await axios.post(`/conversations/create`, {
+            email: email,
+            message: message,
+        });
+        window.location.href = response.data.redirect;
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
+}
+
 const updateLastActiveAt = async (id) => {
-    
     try {
         const response = await axios.post(
             `/users/updateLastActiveAt`
         );
-        // console.log("lastActive");
-
         // window.location.href = response.data.redirect;
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-
 }
-const searchUsers = ref([]);
-const search = ref(null);
+
 const fetchUsers = async () => {
     const params = { search: search.value }; // Set params
 
@@ -448,7 +443,12 @@ const fetchUsers = async () => {
                             <div
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
-                                <div
+                                <img  v-if="searchUser.image"
+                                        :src="searchUser.image"
+                                        alt="Avatar"
+                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                />
+                                <div v-else
                                     class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
                                 >
                                     {{ searchUser.name[0] }}

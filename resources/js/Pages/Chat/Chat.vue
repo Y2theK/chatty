@@ -40,6 +40,16 @@ const form = useForm({
     message: "",
 });
 
+const addedEmail = ref("");
+const messages = ref([...props.messages.data.reverse()]);
+const messageContainer = ref(null);
+const onlineUsers = ref([]); //online users in this conversations
+const isUserTyping = ref(false);
+const typingUserName = ref("");
+const isUserTypingTimer = ref(null);
+
+const users = ref([...props.conversation.users]);
+
 const submit = () => {
     if (form.message) {
         form.post(route("messages.store", props.conversation.id), {
@@ -48,8 +58,6 @@ const submit = () => {
         });
     }
 };
-const addedEmail = ref("");
-
 const inviteToGroup = async () => {
     if (addedEmail.value.trim() !== "") {
         try {
@@ -68,19 +76,16 @@ const inviteToGroup = async () => {
 };
 
 const deleteMessage = async(id) => {
-        // console.log(id);
-    
-        try {
-            document.getElementById(`message-${id}`).innerHTML = 'Message deleted';
-            const response = await axios.delete(
-                `/conversations/${props.conversation.id}/messages/${id}`,
-            );
+    try {
+        document.getElementById(`message-${id}`).innerHTML = 'Message deleted';
+        const response = await axios.delete(
+            `/conversations/${props.conversation.id}/messages/${id}`,
+        );
 
-        } catch (error) {
-            console.error("Failed to send message:", error);
-        }
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
 }
-
 
 const leaveGroup = async() => {
     try {
@@ -92,15 +97,6 @@ const leaveGroup = async() => {
         console.error("Failed to send message:", error);
     }
 }
-
-const messages = ref([...props.messages.data.reverse()]);
-const messageContainer = ref(null);
-const onlineUsers = ref([]); //online users in this conversations
-const isUserTyping = ref(false);
-const typingUserName = ref("");
-const isUserTypingTimer = ref(null);
-
-const users = ref([...props.conversation.users]);
 
 watch(
     messages,
