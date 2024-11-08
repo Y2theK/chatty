@@ -12,6 +12,8 @@ class ChatMessageController extends Controller
 {
     public function destroy(Conversation $conversation,ChatMessage $message)
     {
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
+
         $message = ChatMessage::where([
             'user_id' => auth()->id(),
             'conversation_id' => $conversation->id,
@@ -25,6 +27,8 @@ class ChatMessageController extends Controller
     }
     public function store(Request $request,Conversation $conversation,ChatMessageService $chatMessageService)
     {
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
+
         $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
 
         broadcast(new ChatMessageSent($message->load('user:id,name,image')));

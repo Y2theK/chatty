@@ -21,9 +21,9 @@ use Illuminate\Support\Facades\Broadcast;
 //     return ['id' => $user->id, 'name' => $user->name];
 // });
 
-// Broadcast::channel('conversation.{id}', function ($user, $id) {
-//     return isUserContainsInConversation($user,$id);
-// });
+Broadcast::channel('conversation.{id}', function ($user, $id) {
+    return isUserContainsInConversation($user,$id);
+});
 
 Broadcast::channel('conversation.{id}', function ($user,$id) {
     $isCorrectUser = isUserContainsInConversation($user,$id);

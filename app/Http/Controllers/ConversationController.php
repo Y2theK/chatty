@@ -36,6 +36,8 @@ class ConversationController extends Controller
     }
     public function show(Conversation $conversation)
     {
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
+
         $user = auth()->user();
         $conversations = $this->conversationService->getuserConversation($user);
       
@@ -103,6 +105,8 @@ class ConversationController extends Controller
 
     public function addGroup(Conversation $conversation,Request $request)
     {
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
+
         $user = User::where('email',$request->email)->first();
 
         if(!$user){
@@ -129,6 +133,8 @@ class ConversationController extends Controller
     }
     public function leaveConversation(Conversation $conversation,Request $request)
     {
+
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
         ConversationUser::where('user_id',auth()->id())->where('conversation_id',$conversation->id)->delete();
         
