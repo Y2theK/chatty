@@ -14,9 +14,9 @@ class Conversation extends Model
         'is_group',
         'updated_at'
     ];
-    public function allUsers() : BelongsToMany
+    public function usersExceptAuth() : BelongsToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class)->whereNot('user_id',auth()->id())->distinct();
     }
    
     public function users() : BelongsToMany

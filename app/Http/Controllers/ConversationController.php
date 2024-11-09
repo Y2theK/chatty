@@ -34,15 +34,19 @@ class ConversationController extends Controller
         ]);
 
     }
-    public function show(Conversation $conversation)
+    public function show(Conversation $conversation,ChatMessageService $chatMessageService)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
         $user = auth()->user();
-        $conversations = $this->conversationService->getuserConversation($user);
-      
+        //update seen by to latestMessage if user enter to the conversation
+        if($conversation->latestMessage){
+            $chatMessageService->addSeenByUser($conversation->latestMessage,$user);
+        }
+
+        $conversations = $this->conversationService->getuserConversation($user);      
         $messages = ChatMessage::with('user:id,name,image')->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
-        // dd($messages,MessageResource::collection($messages));
+
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
