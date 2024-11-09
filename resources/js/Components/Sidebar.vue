@@ -1,6 +1,6 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
-import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { Link, usePage } from "@inertiajs/vue3";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { PlusSquareIcon, Search, UserPen } from "lucide-vue-next";
@@ -48,6 +48,11 @@ const props = defineProps({
         required: true,
     },
 });
+const conversations = computed(() => {    
+    return props.conversations.sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))
+})
+
+const user = computed(() => usePage().props.auth.user)
 
 const groupColors = [
     "bg-red-200",
@@ -61,7 +66,26 @@ const allOnlineUsers = ref([]);
 const searchUsers = ref([]);
 const search = ref(null);
 
+const moveConversationOnTop = (updatedConversation) => {
+      // Find the updated conversation and move it to the top of the list
+      const index = conversations.value.findIndex(
+        (c) => c.id === updatedConversation.id
+      );
+      
+      if (index !== -1) {
+        conversations.value.splice(index, 1); // Remove it from its current position
+      }
+      // Add it to the top
+      conversations.value.unshift(updatedConversation);
+    }
+
 onMounted(() => {
+
+    window.Echo.private(`user.${user.value.id}`)
+        .listen("ConversationUpdate", (response) => {
+            moveConversationOnTop(response.conversation);
+        })
+
     window.Echo.join(`online`)
         .here((users) => {
             allOnlineUsers.value = users;
@@ -73,7 +97,8 @@ onMounted(() => {
             allOnlineUsers.value = allOnlineUsers.value.filter(
                 (u) => u.id !== user.id
             );
-        });
+        });        
+   
 });
 
 onBeforeMount(() => {
@@ -333,7 +358,7 @@ const fetchUsers = async () => {
                                     />
                                     <div
                                         v-else
-                                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                        class="flex items-center justify-center h-8 w-8  bg-indigo-200 rounded-full"
                                     >
                                         {{ conversation.users[0].name[0] }}
                                     </div>
@@ -365,39 +390,7 @@ const fetchUsers = async () => {
                                 </div>
                             </div>
                             <div v-else class="flex flex-row items-center p-2">
-                                <!-- <div
-                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                >
-                                    {{
-                                        $page.props.auth.user.name[0].toUpperCase()
-                                    }}
-                                </div> -->
-                                <div class="relative">
-                                    <img
-                                        v-if="$page.props.auth.user.image"
-                                        :src="$page.props.auth.user.image"
-                                        alt="Avatar"
-                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                    />
-                                    <div
-                                        v-else
-                                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                    >
-                                        {{ $page.props.auth.user.name[0].toUpperCase() }}
-                                    </div>
-                                    <span
-                                        :class="
-                                            allOnlineUsers.find(
-                                                (u) =>
-                                                    u.id ==
-                                                    $page.props.auth.user.id
-                                            )
-                                                ? 'bg-green-500'
-                                                : 'bg-red-400'
-                                        "
-                                        class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
-                                    ></span>
-                                </div>
+                               
                                 <div
                                     class=""
                                     v-for="(
@@ -410,10 +403,11 @@ const fetchUsers = async () => {
                                             v-if="user.image"
                                             :src="user.image"
                                             alt="Avatar"
-                                            class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                            class="h-8 w-8 rounded-full border-3  -ml-1 border-indigo-200"
                                         />
                                         <div
                                             v-else
+                                            
                                             :class="
                                                 groupColors[
                                                     index % groupColors.length

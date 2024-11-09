@@ -11,7 +11,8 @@ class Conversation extends Model
 {
     protected $fillable = [
         'name',
-        'is_group'
+        'is_group',
+        'updated_at'
     ];
     public function allUsers() : BelongsToMany
     {
@@ -20,7 +21,7 @@ class Conversation extends Model
    
     public function users() : BelongsToMany
     {
-        return $this->belongsToMany(User::class)->whereNot('user_id',auth()->id())->distinct();
+        return $this->belongsToMany(User::class)->distinct();
     }
 
     public function messages() : HasMany
