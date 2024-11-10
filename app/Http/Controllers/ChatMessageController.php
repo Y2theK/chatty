@@ -12,6 +12,22 @@ use Illuminate\Broadcasting\PrivateChannel;
 
 class ChatMessageController extends Controller
 {
+    public function store(Request $request,Conversation $conversation,ChatMessageService $chatMessageService)
+    {
+        abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
+
+        $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
+        $conversation->update(['updated_at' => now()]);
+        
+        // chat message sending in real time
+        broadcast(new ChatMessageSent($message->load('user:id,name,image')))->toOthers(); 
+        
+        // conversation updating in real time , to move to the top of coversations lists in sidebars
+        broadcast(new ConversationUpdate($conversation->load(['users:id,name,last_active_at,image','latestMessage'])))->toOthers(); 
+
+        return redirect()->route('conversations.show',$conversation);
+    }
+
     public function destroy(Conversation $conversation,ChatMessage $message)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
@@ -27,19 +43,20 @@ class ChatMessageController extends Controller
             'message' => "Deleted Message"
         ]);
     }
-    public function store(Request $request,Conversation $conversation,ChatMessageService $chatMessageService)
+    public function addSeenBy(Conversation $conversation,ChatMessageService $chatMessageService)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
-        $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
-        $conversation->update(['updated_at' => now()]);
-        
-        // chat message sending in real time
-        broadcast(new ChatMessageSent($message->load('user:id,name,image')))->toOthers(); 
-        
-        // conversation updating in real time , to move to the top of coversations lists in sidebars
-        broadcast(new ConversationUpdate($conversation->load(['users:id,name,last_active_at,image','latestMessage'])))->toOthers(); 
-        return redirect()->route('conversations.show',$conversation);
-        // return response()->json($message);
+        $user = auth()->user();
+        //update seen by to latestMessage if user enter to the conversation
+        if($conversation->latestMessage){
+            $chatMessageService->addSeenByUser($conversation->latestMessage,$user);
+        }
+    //    dd($conversation->latestMessage);
+        return response()->json([
+            'success' => true,
+            'message' => "Added Seenby"
+        ]);
     }
+  
 }

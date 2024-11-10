@@ -345,7 +345,7 @@ const fetchUsers = async () => {
                         class="flex justify-between items-center hover:bg-gray-100 rounded-xl"
                     >
                         <div>
-                            <div
+                            <!-- <div
                                 v-if="!conversation.is_group"
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
@@ -388,9 +388,8 @@ const fetchUsers = async () => {
                                         }}</small
                                     >
                                 </div>
-                            </div>
-                            <div v-else class="flex flex-row items-center p-2">
-                               
+                            </div> -->
+                            <div class="flex flex-row items-center p-2">
                                 <div
                                     class=""
                                     v-for="(
@@ -398,7 +397,7 @@ const fetchUsers = async () => {
                                     ) in conversation.users.slice(0, 5)"
                                     :key="user.id"
                                 >
-                                    <div class="relative">
+                                    <div class="relative" v-if="user.id != $page.props.auth.user.id">
                                         <img
                                             v-if="user.image"
                                             :src="user.image"
@@ -429,13 +428,22 @@ const fetchUsers = async () => {
                                         ></span>
                                     </div>
                                 </div>
-                                <div class="ml-2">
-                                    <span
-                                        v-if="conversation.name"
-                                        class="text-sm font-semibold"
-                                    >
-                                        {{ conversation.name?.toUpperCase() }}
-                                    </span> 
+                                <div class="ml-2" >
+                                    <div v-if="conversation.is_group && conversation.name">
+                                       <span class="text-sm font-semibold">
+                                            {{ conversation.name }}
+                                       </span> 
+                                    </div>
+                                    <div v-else>
+                                        <p v-for="(
+                                        user
+                                        ) in conversation.users"
+                                        :key="user.id">
+                                            <span v-if="user.id != $page.props.auth.user.id" class="text-sm font-semibold">
+                                            {{ user.name }}
+                                            </span>                                        
+                                        </p>
+                                    </div>
                                     <small
                                         class="flex"
                                         v-if="conversation.latest_message"

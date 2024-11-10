@@ -61,13 +61,11 @@ const updateCursorPosition = (event) => {
 };
 
 const selectedEmoji = async (args) => {
-    
     const input = textInput.value;    
     const emoji = args.unicode;
     const before = form.message.slice(0, cursorPosition.value);
     const after =  form.message.slice(cursorPosition.value);
     form.message = before + emoji + after;
-    console.log(args);
     
     // Update cursor position after emoji insertion
     await nextTick();
@@ -76,6 +74,7 @@ const selectedEmoji = async (args) => {
     input.focus();
 };
 
+// change to axios request later
 const submit = () => {
     if (form.message) {
         form.post(route("messages.store", props.conversation.id), {
@@ -124,6 +123,18 @@ const leaveGroup = async() => {
     }
 }
 
+const addSeenByUser = async() => {
+    try {
+        const response = await axios.post(
+            `/conversations/${props.conversation.id}/messages/add-seen-by`
+        );
+        console.log(response);
+        
+    } catch (error) {
+        console.error("Failed to send message:", error);
+    }
+}
+
 watch(
     messages,
     () => {
@@ -156,6 +167,7 @@ onMounted(() => {
 
     window.Echo.private(`conversation.${props.conversation.id}`)
         .listen("ChatMessageSent", (response) => {
+            addSeenByUser();
             messages.value.push(response.chatMessage);
         })
         .listenForWhisper("typing", (response) => {
@@ -211,50 +223,35 @@ onBeforeUnmount(() => {
                 <div>
                     <div
                         class="flex items-center bg-gray-100 rounded-xl px-4"
-                        v-if="!conversation.is_group"
-                    >
-                        <div class="text-lg font-semibold mr-2 p-2 rounded">
-                           <div>
-                            {{ users[0].name }}
-                            <span
-                                :class="
-                                    onlineUsers.find((u) => u.id == users[0].id)
-                                        ? 'bg-green-500'
-                                        : 'bg-red-400'
-                                "
-                                class="inline-block h-2 w-2 rounded-full"
-                            ></span>
-                           </div>
-                           <small v-if="! onlineUsers.find((u) => u.id == users[0].id)" class=" font-normal text-xs">Last seen {{ users[0].last_active_at ? moment(users[0].last_active_at).fromNow() : 'a long time ago'  }}</small>
-                        </div>
-                    </div>
-                    <div
-                        class="flex items-center bg-gray-100 rounded-xl px-4"
-                        v-else
                     >
                         <span
-                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
-                            v-show="conversation.name"
+                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded" v-if="conversation.is_group && conversation.name"
                             >{{ conversation.name?.toUpperCase() }}</span
-                        >
+                        >                      
                         <div
                             v-for="user in onlineUsers"
                             :key="user.id"
                             class=""
                         >
                             <div
-                                class="text-md font-semibold mr-2 border p-2 rounded h-10"
+                                class=""
                                 v-if="user.id !== auth.user.id"
                             >
-                                {{ user.name.split(" ")[0] }}
-                                <span
+                                <div class="text-lg font-semibold mr-2 p-2 rounded" v-if="!conversation.is_group">
+                                    {{ user.name }}
+                                </div>
+                                <div class="border h-10 text-md font-semibold mr-2  p-2 rounded" v-else>
+                                    {{ user.name.split(" ")[0] }}
+                                    <span
                                     :class="
                                         onlineUsers.find((u) => u.id == user.id)
                                             ? 'bg-green-500'
                                             : 'bg-red-400'
                                     "
                                     class="inline-block h-2 w-2 rounded-full"
-                                ></span>
+                                    ></span>
+                                </div>
+                               
                             </div>
                         </div>
                     </div>

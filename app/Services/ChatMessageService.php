@@ -23,7 +23,7 @@ class ChatMessageService
     {
         $seen_by = $message->seen_by;
         $seen_by_array = explode(',',$seen_by);
-        if(!in_array($user->id,$seen_by_array)){
+        if(!in_array($user->id,$seen_by_array) && $message->user_id != $user->id){
             tap($message->update([
                 'seen_by' => $seen_by ? $seen_by . ',' . $user->id : $user->id
             ]));

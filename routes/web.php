@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/conversations/{conversation}/add', [ConversationController::class, 'addGroup'])->name('conversations.addGroup'); // invite to group or conversation
     Route::delete('/conversations/{conversation}/leave', [ConversationController::class, 'leaveConversation'])->name('conversations.leaveConversation'); //leave conversation
 
+    Route::post('/conversations/{conversation}/messages/add-seen-by', [ChatMessageController::class, 'addSeenBy'])->name('messages.add_seen_by'); // message store
     Route::post('/conversations/{conversation}/messages', [ChatMessageController::class, 'store'])->name('messages.store'); // message store
     Route::delete('/conversations/{conversation}/messages/{message}', [ChatMessageController::class, 'destroy'])->name('messages.destroy'); // message delete
 
