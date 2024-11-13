@@ -58,7 +58,6 @@ class ChatMessageController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Added Seenby",
-            'data' => $conversation->latestMessage->load('user:id,name,image')
         ]);
     }
   

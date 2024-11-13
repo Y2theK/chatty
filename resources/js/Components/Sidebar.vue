@@ -47,6 +47,9 @@ const props = defineProps({
     conversations: {
         required: true,
     },
+    allOnlineUsers: {
+        required: true,
+    },
 });
 const conversations = computed(() => {    
     return props.conversations.sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))
@@ -62,7 +65,6 @@ const groupColors = [
     "bg-violet-200",
 ];
 
-const allOnlineUsers = ref([]);
 const searchUsers = ref([]);
 const search = ref(null);
 
@@ -97,26 +99,8 @@ onMounted(() => {
             moveConversationOnTop(response.conversation);
         })
 
-    window.Echo.join(`online`)
-        .here((users) => {
-            allOnlineUsers.value = users;
-        })
-        .joining((user) => {
-            allOnlineUsers.value.push(user);
-        })
-        .leaving((user) => {
-            allOnlineUsers.value = allOnlineUsers.value.filter(
-                (u) => u.id !== user.id
-            );
-        });        
-   
 });
 
-onBeforeMount(() => {
-    window.Echo.leave(`online`, (user) => {
-        allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
-    });
-});
 
 onUnmounted(() => {
     updateLastActiveAt();
@@ -155,7 +139,7 @@ const fetchUsers = async () => {
         const response = await axios.get(route("users.index"), { params });
 
         searchUsers.value = response.data;
-        
+
     } catch (error) {
         console.error("Failed to fetch users:", error);
     }
@@ -416,7 +400,7 @@ const fetchUsers = async () => {
                                         class="flex"
                                         v-if="conversation.latest_message"
                                         >{{
-                                            conversation.latest_message.message
+                                            conversation.latest_message.message.slice(0,20)
                                         }}</small
                                     >
                                 </div>

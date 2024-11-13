@@ -35,7 +35,7 @@ const props = defineProps({
     },
     auth: {
         require: true,
-    },
+    }, 
 });
 const form = useForm({
     message: "",
@@ -184,7 +184,7 @@ onMounted(() => {
             }, 1000);
         });
 
-    window.Echo.join(`conversation.${props.conversation.id}`)
+    window.Echo.join(`online`)
         .here((users) => {
             onlineUsers.value = users;
             // console.log("here");
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
                             >{{ conversation.name?.toUpperCase() }}</span
                         >                      
                         <div
-                            v-for="user in onlineUsers"
+                            v-for="user in users"
                             :key="user.id"
                             class=""
                         >
@@ -239,7 +239,21 @@ onBeforeUnmount(() => {
                                 v-if="user.id !== auth.user.id"
                             >
                                 <div class="text-lg font-semibold mr-2 p-2 rounded" v-if="!conversation.is_group">
-                                    {{ user.name }}
+                                    <p>{{ user.name }}</p>
+                                   
+                                    <small class=" font-normal text-xs" v-if="!onlineUsers.find((u) => u.id == user.id)">Last seen {{ user.last_active_at ? moment(user.last_active_at).fromNow() : 'a long time ago'  }}</small>
+                                    <p class=" font-normal text-xs" v-else>
+                                    <span
+                                    :class="
+                                        onlineUsers.find((u) => u.id == user.id)
+                                            ? 'bg-green-500'
+                                            : 'bg-red-400'
+                                    "
+                                    class="inline-block h-2 w-2 rounded-full"
+                                    ></span>
+                                    Active now
+                                    </p>
+
                                 </div>
                                 <div class="border h-10 text-md font-semibold mr-2  p-2 rounded" v-else>
                                     {{ user.name.split(" ")[0] }}
@@ -348,7 +362,14 @@ onBeforeUnmount(() => {
                             <div :id="'message-'+message.id"
                                 class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between group"
                             >
-                            <div>{{ message.message }}</div>
+                            <div>
+                                <p>
+                                    {{ message.message }}
+                                </p>
+                                <p class="text-end">
+                                    <small>{{ moment(message.created_at).format('hh:mm a') }}</small>
+                                </p>
+                            </div>
                             <Trash class="w-4 h-4 cursor-pointer hidden group-hover:block"  @click="deleteMessage(message.id)"/>
 
                         </div>
@@ -387,7 +408,15 @@ onBeforeUnmount(() => {
                             <div
                                 class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl"
                             >
-                                <div>{{ message.message }}</div>
+                                <div>
+                                    <p>
+                                        {{ message.message }}
+                                    </p>
+                                    <p class="text-end">
+                                        <small>{{ moment(message.created_at).format('hh:mm a') }}</small>
+                                    </p>
+                                </div>
+
                             </div>
                         </div>
                     </div>
