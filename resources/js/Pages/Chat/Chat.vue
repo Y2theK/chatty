@@ -128,7 +128,8 @@ const addSeenByUser = async() => {
         const response = await axios.post(
             `/conversations/${props.conversation.id}/messages/add-seen-by`
         );
-        console.log(response);
+        return response;
+        // console.log(response);
         
     } catch (error) {
         console.error("Failed to send message:", error);
@@ -166,7 +167,7 @@ onMounted(() => {
     scrollToHeight();
 
     window.Echo.private(`conversation.${props.conversation.id}`)
-        .listen("ChatMessageSent", (response) => {
+        .listen("ChatMessageSent",  (response) => {
             addSeenByUser();
             messages.value.push(response.chatMessage);
         })

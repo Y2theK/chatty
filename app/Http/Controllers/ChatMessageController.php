@@ -52,10 +52,13 @@ class ChatMessageController extends Controller
         if($conversation->latestMessage){
             $chatMessageService->addSeenByUser($conversation->latestMessage,$user);
         }
-    //    dd($conversation->latestMessage);
+
+        broadcast(new ConversationUpdate($conversation->load(['users:id,name,last_active_at,image','latestMessage'])))->toOthers(); 
+
         return response()->json([
             'success' => true,
-            'message' => "Added Seenby"
+            'message' => "Added Seenby",
+            'data' => $conversation->latestMessage->load('user:id,name,image')
         ]);
     }
   

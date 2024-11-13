@@ -66,6 +66,17 @@ const allOnlineUsers = ref([]);
 const searchUsers = ref([]);
 const search = ref(null);
 
+const isLatestMessageSeenByAuthUser = (conversation) => {
+  
+    if(conversation.latest_message.user_id == user.value.id){
+        return true;
+    }
+    if(conversation.latest_message.seen_by){        
+        return conversation.latest_message.seen_by.split(',').includes(user.value.id.toString());
+    }
+    return false;
+}
+
 const moveConversationOnTop = (updatedConversation) => {
       // Find the updated conversation and move it to the top of the list
       const index = conversations.value.findIndex(
@@ -143,8 +154,8 @@ const fetchUsers = async () => {
         // Use axios.get with params as the second argument
         const response = await axios.get(route("users.index"), { params });
 
-        console.log(response, search.value);
         searchUsers.value = response.data;
+        
     } catch (error) {
         console.error("Failed to fetch users:", error);
     }
@@ -345,50 +356,7 @@ const fetchUsers = async () => {
                         class="flex justify-between items-center hover:bg-gray-100 rounded-xl"
                     >
                         <div>
-                            <!-- <div
-                                v-if="!conversation.is_group"
-                                class="flex flex-row items-center rounded-xl p-2"
-                            >
-                                <div class="relative">
-                                    <img
-                                        v-if="conversation.users[0].image"
-                                        :src="conversation.users[0].image"
-                                        alt="Avatar"
-                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                    />
-                                    <div
-                                        v-else
-                                        class="flex items-center justify-center h-8 w-8  bg-indigo-200 rounded-full"
-                                    >
-                                        {{ conversation.users[0].name[0] }}
-                                    </div>
-                                    <span
-                                        :class="
-                                            allOnlineUsers.find(
-                                                (u) =>
-                                                    u.id ==
-                                                    conversation.users[0].id
-                                            )
-                                                ? 'bg-green-500'
-                                                : 'bg-red-400'
-                                        "
-                                        class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
-                                    ></span>
-                                </div>
-
-                                <div class="ml-2">
-                                    <span class="text-sm font-semibold">{{
-                                        conversation.users[0].name
-                                    }}</span>
-                                    <small
-                                        class="flex"
-                                        v-if="conversation.latest_message"
-                                        >{{
-                                            conversation.latest_message.message
-                                        }}</small
-                                    >
-                                </div>
-                            </div> -->
+                        
                             <div class="flex flex-row items-center p-2">
                                 <div
                                     class=""
@@ -444,7 +412,7 @@ const fetchUsers = async () => {
                                             </span>                                        
                                         </p>
                                     </div>
-                                    <small
+                                    <small :class="[isLatestMessageSeenByAuthUser(conversation) ? '' : 'font-bold']"
                                         class="flex"
                                         v-if="conversation.latest_message"
                                         >{{
