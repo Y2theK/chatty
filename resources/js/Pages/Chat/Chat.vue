@@ -4,7 +4,14 @@ import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
-import { ChevronLeft,ChevronRight, LogOut, Plus, Trash  } from 'lucide-vue-next';
+import {
+    ChevronLeft,
+    ChevronRight,
+    LogOut,
+    Plus,
+    Trash,
+    CheckCheck
+} from "lucide-vue-next";
 
 import {
     Dialog,
@@ -35,7 +42,7 @@ const props = defineProps({
     },
     auth: {
         require: true,
-    }, 
+    },
 });
 const form = useForm({
     message: "",
@@ -61,12 +68,12 @@ const updateCursorPosition = (event) => {
 };
 
 const selectedEmoji = async (args) => {
-    const input = textInput.value;    
+    const input = textInput.value;
     const emoji = args.unicode;
     const before = form.message.slice(0, cursorPosition.value);
-    const after =  form.message.slice(cursorPosition.value);
+    const after = form.message.slice(cursorPosition.value);
     form.message = before + emoji + after;
-    
+
     // Update cursor position after emoji insertion
     await nextTick();
     cursorPosition.value += emoji.length;
@@ -100,19 +107,18 @@ const inviteToGroup = async () => {
     }
 };
 
-const deleteMessage = async(id) => {
+const deleteMessage = async (id) => {
     try {
-        document.getElementById(`message-${id}`).innerHTML = 'Message deleted';
+        document.getElementById(`message-${id}`).innerHTML = "Message deleted";
         const response = await axios.delete(
-            `/conversations/${props.conversation.id}/messages/${id}`,
+            `/conversations/${props.conversation.id}/messages/${id}`
         );
-
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-}
+};
 
-const leaveGroup = async() => {
+const leaveGroup = async () => {
     try {
         const response = await axios.delete(
             `/conversations/${props.conversation.id}/leave`
@@ -121,20 +127,18 @@ const leaveGroup = async() => {
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-}
+};
 
-const addSeenByUser = async() => {
+const addSeenByUser = async () => {
     try {
         const response = await axios.post(
             `/conversations/${props.conversation.id}/messages/add-seen-by`
         );
         return response;
-        // console.log(response);
-        
     } catch (error) {
         console.error("Failed to send message:", error);
     }
-}
+};
 
 watch(
     messages,
@@ -163,13 +167,14 @@ const scrollToHeight = () => {
     });
 };
 
+
 onMounted(() => {
     scrollToHeight();
 
     window.Echo.private(`conversation.${props.conversation.id}`)
-        .listen("ChatMessageSent",  (response) => {
-            addSeenByUser();
-            messages.value.push(response.chatMessage);
+        .listen("ChatMessageSent", async (response) => {
+            const res = await addSeenByUser();
+            messages.value.push(res.data.data);
         })
         .listenForWhisper("typing", (response) => {
             isUserTyping.value = response.userID !== props.auth.user.id;
@@ -199,7 +204,6 @@ onMounted(() => {
                 (u) => u.id !== user.id
             );
             // console.log("leaving");
-            
         });
 });
 
@@ -214,7 +218,7 @@ onBeforeUnmount(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="justify-between border-b py-4 flex flex-col md:flex-row ">
+        <div class="justify-between border-b py-4 flex flex-col md:flex-row">
             <div class="flex items-center">
                 <Link :href="route('dashboard')">
                     <Button variant="outline" size="icon">
@@ -222,66 +226,84 @@ onBeforeUnmount(() => {
                     </Button>
                 </Link>
                 <div>
-                    <div
-                        class="flex items-center bg-gray-100 rounded-xl px-4"
-                    >
+                    <div class="flex items-center bg-gray-100 rounded-xl px-4">
                         <span
-                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded" v-if="conversation.is_group && conversation.name"
+                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
+                            v-if="conversation.is_group && conversation.name"
                             >{{ conversation.name?.toUpperCase() }}</span
-                        >                      
-                        <div
-                            v-for="user in users"
-                            :key="user.id"
-                            class=""
                         >
-                            <div
-                                class=""
-                                v-if="user.id !== auth.user.id"
-                            >
-                                <div class="text-lg font-semibold mr-2 p-2 rounded" v-if="!conversation.is_group">
+                        <div v-for="user in users" :key="user.id" class="">
+                            <div class="" v-if="user.id !== auth.user.id">
+                                <div
+                                    class="text-lg font-semibold mr-2 p-2 rounded"
+                                    v-if="!conversation.is_group"
+                                >
                                     <p>{{ user.name }}</p>
-                                   
-                                    <small class=" font-normal text-xs" v-if="!onlineUsers.find((u) => u.id == user.id)">Last seen {{ user.last_active_at ? moment(user.last_active_at).fromNow() : 'a long time ago'  }}</small>
-                                    <p class=" font-normal text-xs" v-else>
-                                    <span
-                                    :class="
-                                        onlineUsers.find((u) => u.id == user.id)
-                                            ? 'bg-green-500'
-                                            : 'bg-red-400'
-                                    "
-                                    class="inline-block h-2 w-2 rounded-full"
-                                    ></span>
-                                    Active now
-                                    </p>
 
+                                    <small
+                                        class="font-normal text-xs"
+                                        v-if="
+                                            !onlineUsers.find(
+                                                (u) => u.id == user.id
+                                            )
+                                        "
+                                        >Last seen
+                                        {{
+                                            user.last_active_at
+                                                ? moment(
+                                                      user.last_active_at
+                                                  ).fromNow()
+                                                : "a long time ago"
+                                        }}</small
+                                    >
+                                    <p class="font-normal text-xs" v-else>
+                                        <span
+                                            :class="
+                                                onlineUsers.find(
+                                                    (u) => u.id == user.id
+                                                )
+                                                    ? 'bg-green-500'
+                                                    : 'bg-red-400'
+                                            "
+                                            class="inline-block h-2 w-2 rounded-full"
+                                        ></span>
+                                        Active now
+                                    </p>
                                 </div>
-                                <div class="border h-10 text-md font-semibold mr-2  p-2 rounded" v-else>
+                                <div
+                                    class="border h-10 text-md font-semibold mr-2 p-2 rounded"
+                                    v-else
+                                >
                                     {{ user.name.split(" ")[0] }}
                                     <span
-                                    :class="
-                                        onlineUsers.find((u) => u.id == user.id)
-                                            ? 'bg-green-500'
-                                            : 'bg-red-400'
-                                    "
-                                    class="inline-block h-2 w-2 rounded-full"
+                                        :class="
+                                            onlineUsers.find(
+                                                (u) => u.id == user.id
+                                            )
+                                                ? 'bg-green-500'
+                                                : 'bg-red-400'
+                                        "
+                                        class="inline-block h-2 w-2 rounded-full"
                                     ></span>
                                 </div>
-                               
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="mx-14 md:mx-4 mt-1 flex items-center gap-2" >
+            <div class="mx-14 md:mx-4 mt-1 flex items-center gap-2">
                 <Dialog>
                     <DialogTrigger as-child>
-                        <Button variant="outline">  <Plus class="w-4 h-4" />Add</Button>
+                        <Button variant="outline">
+                            <Plus class="w-4 h-4" />Add</Button
+                        >
                     </DialogTrigger>
                     <DialogContent class="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>Add new member</DialogTitle>
                             <DialogDescription>
-                                You can add someone to this group by email. New member also got to see chat history.
+                                You can add someone to this group by email. New
+                                member also got to see chat history.
                             </DialogDescription>
                         </DialogHeader>
                         <div>
@@ -308,10 +330,9 @@ onBeforeUnmount(() => {
                     </DialogContent>
                 </Dialog>
                 <Button variant="outline" class="" @click="leaveGroup">
-                    <LogOut class="w-4 h-4" />Leave 
+                    <LogOut class="w-4 h-4" />Leave
                 </Button>
             </div>
-            
         </div>
 
         <div
@@ -331,7 +352,6 @@ onBeforeUnmount(() => {
                         <div
                             class="flex items-center justify-start flex-row-reverse"
                         >
-
                             <div class="relative">
                                 <img
                                     v-if="message.user.image"
@@ -348,9 +368,7 @@ onBeforeUnmount(() => {
                                 <span
                                     :class="
                                         onlineUsers.find(
-                                            (u) =>
-                                                u.id ==
-                                                message.user.id
+                                            (u) => u.id == message.user.id
                                         )
                                             ? 'bg-green-500'
                                             : 'bg-red-400'
@@ -358,23 +376,31 @@ onBeforeUnmount(() => {
                                     class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
                                 ></span>
                             </div>
-                            
-                            <div :id="'message-'+message.id"
-                                class="relative mr-3 text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between group"
+                            <div
+                               
+                                class="mr-3 group flex items-center gap-2"
                             >
-                            <div>
-                                <p>
-                                    {{ message.message }}
-                                </p>
-                                <p class="text-end">
-                                    <small>{{ moment(message.created_at).format('hh:mm a') }}</small>
-                                </p>
+                                <div>
+                                    <Trash class="w-4 h-4 cursor-pointer hidden group-hover:block"  @click="deleteMessage(message.id)"/>
+                                </div>
+                                <div  :id="'message-' + message.id" class="relative text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between">
+                                       <div>
+                                            <p>
+                                                {{ message.message }}
+                                            </p>
+                                            <p class="text-end">
+                                                <small>{{
+                                                    moment(
+                                                        message.created_at
+                                                    ).format("hh:mm a")
+                                                }}</small>
+                                            <small class="px-2"> 
+                                                <CheckCheck class="w-3 h-3 inline-block"  :class="[message.seen_by ? 'text-green-500' : '' ]"/>
+                                            </small>
+                                            </p>
+                                       </div>
+                                    </div>
                             </div>
-                            <Trash class="w-4 h-4 cursor-pointer hidden group-hover:block"  @click="deleteMessage(message.id)"/>
-
-                        </div>
-
-
                         </div>
                     </div>
                     <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>
@@ -395,9 +421,7 @@ onBeforeUnmount(() => {
                                 <span
                                     :class="
                                         onlineUsers.find(
-                                            (u) =>
-                                                u.id ==
-                                                message.user.id
+                                            (u) => u.id == message.user.id
                                         )
                                             ? 'bg-green-500'
                                             : 'bg-red-400'
@@ -413,10 +437,13 @@ onBeforeUnmount(() => {
                                         {{ message.message }}
                                     </p>
                                     <p class="text-end">
-                                        <small>{{ moment(message.created_at).format('hh:mm a') }}</small>
+                                        <small>{{
+                                            moment(message.created_at).format(
+                                                "hh:mm a"
+                                            )
+                                        }}</small>
                                     </p>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -457,25 +484,23 @@ onBeforeUnmount(() => {
                 @submit.prevent="submit"
                 class="flex justify-center items-center flex-grow"
             >
-          
                 <div class="ml-4 flex-grow">
-                    
                     <div class="relative w-full py-2">
-                        
                         <input
                             type="text"
                             class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
                             v-model="form.message"
-                            ref="textInput" 
+                            ref="textInput"
                             @keydown="sendTypingEvent"
-                            @click="updateCursorPosition" 
+                            @click="updateCursorPosition"
                             @keyup="updateCursorPosition"
                         />
-                     
-                        <button type="button"
-                           @click="open = !open"
-                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"   
-                        >                       
+
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
+                        >
                             <svg
                                 class="w-6 h-6"
                                 fill="none"
@@ -489,18 +514,18 @@ onBeforeUnmount(() => {
                                     stroke-width="2"
                                     d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                 ></path>
-                            </svg> 
-                        </button> 
+                            </svg>
+                        </button>
                     </div>
-                   
+
                     <small v-if="isUserTyping" class="text-gray-600 mt-5">
                         {{ typingUserName }} is typing...
                     </small>
                 </div>
                 <div class="ml-4 relative">
                     <VueChatEmojiComponent
-                            :open="open"
-                            v-if="open"
+                        :open="open"
+                        v-if="open"
                         width="280px"
                         @handle="selectedEmoji"
                         class="grid place-items-end"
@@ -526,11 +551,8 @@ onBeforeUnmount(() => {
                             </svg>
                         </span>
                     </button>
-                    
                 </div>
-              
             </form>
-        
         </div>
     </Dashboard>
 </template>

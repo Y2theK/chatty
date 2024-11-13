@@ -4,15 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Inertia\Inertia;
-use App\Models\Message;
-use App\Events\MessageSent;
 use App\Models\ChatMessage;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
-use App\Events\ChatMessageSent;
 use App\Models\ConversationUser;
 use App\Services\ConversationService;
-use App\Http\Resources\MessageResource;
 use App\Services\ChatMessageService;
 
 class ConversationController extends Controller
