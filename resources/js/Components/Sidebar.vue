@@ -1,6 +1,6 @@
 <script setup>
 import { Link, usePage } from "@inertiajs/vue3";
-import { computed, onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { Button } from "@/components/ui/button";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 import { PlusSquareIcon, Search, UserPen } from "lucide-vue-next";
@@ -24,13 +24,11 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/toast";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
 import { h } from "vue";
 import * as z from "zod";
-import { defaultDocument } from "@vueuse/core";
 
 const formSchema = toTypedSchema(
     z.object({
@@ -51,11 +49,13 @@ const props = defineProps({
         required: true,
     },
 });
-const conversations = computed(() => {    
-    return props.conversations.sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))
-})
+const conversations = computed(() => {
+    return props.conversations.sort(
+        (a, b) => new Date(b.updated_at) - new Date(a.updated_at)
+    );
+});
 
-const user = computed(() => usePage().props.auth.user)
+const user = computed(() => usePage().props.auth.user);
 
 const groupColors = [
     "bg-red-200",
@@ -69,38 +69,38 @@ const searchUsers = ref([]);
 const search = ref(null);
 
 const isLatestMessageSeenByAuthUser = (conversation) => {
-  
-    if(conversation.latest_message.user_id == user.value.id){
+    if (conversation.latest_message.user_id == user.value.id) {
         return true;
     }
-    if(conversation.latest_message.seen_by){        
-        return conversation.latest_message.seen_by.split(',').includes(user.value.id.toString());
+    if (conversation.latest_message.seen_by) {
+        return conversation.latest_message.seen_by
+            .split(",")
+            .includes(user.value.id.toString());
     }
     return false;
-}
+};
 
 const moveConversationOnTop = (updatedConversation) => {
-      // Find the updated conversation and move it to the top of the list
-      const index = conversations.value.findIndex(
+    // Find the updated conversation and move it to the top of the list
+    const index = conversations.value.findIndex(
         (c) => c.id === updatedConversation.id
-      );
-      
-      if (index !== -1) {
+    );
+
+    if (index !== -1) {
         conversations.value.splice(index, 1); // Remove it from its current position
-      }
-      // Add it to the top
-      conversations.value.unshift(updatedConversation);
     }
+    // Add it to the top
+    conversations.value.unshift(updatedConversation);
+};
 
 onMounted(() => {
-
-    window.Echo.private(`user.${user.value.id}`)
-        .listen("ConversationUpdate", (response) => {
+    window.Echo.private(`user.${user.value.id}`).listen(
+        "ConversationUpdate",
+        (response) => {
             moveConversationOnTop(response.conversation);
-        })
-
+        }
+    );
 });
-
 
 onUnmounted(() => {
     updateLastActiveAt();
@@ -139,7 +139,6 @@ const fetchUsers = async () => {
         const response = await axios.get(route("users.index"), { params });
 
         searchUsers.value = response.data;
-
     } catch (error) {
         console.error("Failed to fetch users:", error);
     }
@@ -340,7 +339,6 @@ const fetchUsers = async () => {
                         class="flex justify-between items-center hover:bg-gray-100 rounded-xl"
                     >
                         <div>
-                        
                             <div class="flex flex-row items-center p-2">
                                 <div
                                     class=""
@@ -349,16 +347,20 @@ const fetchUsers = async () => {
                                     ) in conversation.users.slice(0, 5)"
                                     :key="user.id"
                                 >
-                                    <div class="relative" v-if="user.id != $page.props.auth.user.id">
+                                    <div
+                                        class="relative"
+                                        v-if="
+                                            user.id != $page.props.auth.user.id
+                                        "
+                                    >
                                         <img
                                             v-if="user.image"
                                             :src="user.image"
                                             alt="Avatar"
-                                            class="h-8 w-8 rounded-full border-3  -ml-1 border-indigo-200"
+                                            class="h-8 w-8 rounded-full border-3 -ml-1 border-indigo-200"
                                         />
                                         <div
                                             v-else
-                                            
                                             :class="
                                                 groupColors[
                                                     index % groupColors.length
@@ -380,27 +382,48 @@ const fetchUsers = async () => {
                                         ></span>
                                     </div>
                                 </div>
-                                <div class="ml-2" >
-                                    <div v-if="conversation.is_group && conversation.name">
-                                       <span class="text-sm font-semibold">
+                                <div class="ml-2">
+                                    <div
+                                        v-if="
+                                            conversation.is_group &&
+                                            conversation.name
+                                        "
+                                    >
+                                        <span class="text-sm font-semibold">
                                             {{ conversation.name }}
-                                       </span> 
+                                        </span>
                                     </div>
                                     <div v-else>
-                                        <p v-for="(
-                                        user
-                                        ) in conversation.users"
-                                        :key="user.id">
-                                            <span v-if="user.id != $page.props.auth.user.id" class="text-sm font-semibold">
-                                            {{ user.name }}
-                                            </span>                                        
+                                        <p
+                                            v-for="user in conversation.users"
+                                            :key="user.id"
+                                        >
+                                            <span
+                                                v-if="
+                                                    user.id !=
+                                                    $page.props.auth.user.id
+                                                "
+                                                class="text-sm font-semibold"
+                                            >
+                                                {{ user.name }}
+                                            </span>
                                         </p>
                                     </div>
-                                    <small :class="[isLatestMessageSeenByAuthUser(conversation) ? '' : 'font-bold']"
+                                    <small
+                                        :class="[
+                                            isLatestMessageSeenByAuthUser(
+                                                conversation
+                                            )
+                                                ? ''
+                                                : 'font-bold',
+                                        ]"
                                         class="flex"
                                         v-if="conversation.latest_message"
                                         >{{
-                                            conversation.latest_message.message.slice(0,20)
+                                            conversation.latest_message.message.slice(
+                                                0,
+                                                20
+                                            )
                                         }}</small
                                     >
                                 </div>
@@ -427,20 +450,19 @@ const fetchUsers = async () => {
                             <div
                                 class="flex flex-row items-center rounded-xl p-2"
                             >
-                                <img
-                                    v-if="searchUser.image"
-                                    :src="searchUser.image"
-                                    alt="Avatar"
-                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                />
-                                <div
-                                    v-else
-                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                >
-                                    {{ searchUser.name[0] }}
-                                </div>
-                                <div class="ml-2 text-sm font-semibold">
-                                    {{ searchUser.name }}
+                                <div class="relative">
+                                    <img
+                                        v-if="searchUser.image"
+                                        :src="searchUser.image"
+                                        alt="Avatar"
+                                        class="h-8 w-8 rounded-full border-3 border-indigo-200"
+                                    />
+                                    <div
+                                        v-else
+                                        class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                    >
+                                        {{ searchUser.name[0] }}
+                                    </div>
                                     <span
                                         :class="
                                             allOnlineUsers.find(
@@ -449,8 +471,11 @@ const fetchUsers = async () => {
                                                 ? 'bg-green-500'
                                                 : 'bg-red-400'
                                         "
-                                        class="inline-block h-2 w-2 rounded-full"
+                                        class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 left-3 border-2 border-white"
                                     ></span>
+                                </div>
+                                <div class="ml-2 text-sm font-semibold">
+                                    {{ searchUser.name }}
                                 </div>
                             </div>
                         </div>
