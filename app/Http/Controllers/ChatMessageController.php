@@ -8,15 +8,17 @@ use Illuminate\Http\Request;
 use App\Events\ChatMessageSent;
 use App\Events\ConversationUpdate;
 use App\Services\ChatMessageService;
+use App\Http\Requests\MessageCreateRequest;
 use Illuminate\Broadcasting\PrivateChannel;
 
 class ChatMessageController extends Controller
 {
-    public function store(Request $request,Conversation $conversation,ChatMessageService $chatMessageService)
+    public function store(MessageCreateRequest $request,Conversation $conversation,ChatMessageService $chatMessageService)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
         $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
+
         $conversation->update(['updated_at' => now()]);
         
         // chat message sending in real time

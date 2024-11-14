@@ -8,18 +8,14 @@ use App\Models\ChatMessage;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
 use App\Models\ConversationUser;
-use App\Services\ConversationService;
 use App\Services\ChatMessageService;
+use App\Services\ConversationService;
+use App\Http\Requests\ConversationCreateRequest;
 
 class ConversationController extends Controller
 {
-    public function __construct(protected ConversationService $conversationService)
-    {
-        
-    }
+    public function __construct(protected ConversationService $conversationService){}
 
-    
-   
     public function index()
     {
 
@@ -50,7 +46,7 @@ class ConversationController extends Controller
         ]);
     }
 
-    public function createConversation(Request $request,ChatMessageService $chatMessageService)
+    public function createConversation(ConversationCreateRequest $request,ChatMessageService $chatMessageService)
     {
         $user = User::where('email',$request->email)->first();
 
@@ -61,6 +57,7 @@ class ConversationController extends Controller
             ]);
         }
 
+        // check auth user and emailed user have already have conversation or not
         $authUserConversation = auth()->user()->conversations->where('is_group',false)->pluck('id')->toArray();
 
         $userConversation = $user->conversations->where('is_group',false)->pluck('id')->toArray();
@@ -68,32 +65,21 @@ class ConversationController extends Controller
         $isAlreadyHaveConversation = array_values(array_intersect($authUserConversation,$userConversation));
 
         if($isAlreadyHaveConversation){
+            $conversation = Conversation::where('id',$isAlreadyHaveConversation[0])->first();
+        }else{
 
-            $alreadyConversation = Conversation::where('id',$isAlreadyHaveConversation[0])->first();
-
-            // dd($alreadyConversation,$request->message);
-            if($request->message){
-               $chatMessageService->createMessage(auth()->user(),$alreadyConversation,$request->message);
-            }
-
-                // boradcase noti
-            return response()->json([
-                'success' => true,
-                'redirect' => route('conversations.show',$alreadyConversation)
+            //if new conversation
+            $conversation = Conversation::create([
+                'name' => fake()->emoji()
             ]);
+    
+            $this->createConversationUser($user,$conversation);
+            $this->createConversationUser(auth()->user(),$conversation);
         }
                                                         
-        $conversation = Conversation::create([
-            'name' => fake()->emoji()
-        ]);
-
-        $this->createConversationUser($user,$conversation);
-        $this->createConversationUser(auth()->user(),$conversation);
-
         if($request->message){
             $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
         }
-        
         // boradcase noti
 
         return response()->json([
@@ -103,7 +89,7 @@ class ConversationController extends Controller
 
     }
 
-    public function addGroup(Conversation $conversation,Request $request)
+    public function addGroup(Conversation $conversation,ConversationCreateRequest $request)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
