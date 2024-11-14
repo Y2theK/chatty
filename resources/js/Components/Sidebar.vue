@@ -30,6 +30,8 @@ import { useForm } from "vee-validate";
 import { h } from "vue";
 import * as z from "zod";
 
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
 const formSchema = toTypedSchema(
     z.object({
         message: z.string().min(2).max(50),
@@ -171,7 +173,7 @@ const fetchUsers = async () => {
                     ></path>
                 </svg>
             </div>
-            <div class="ml-2 font-bold text-2xl">Chatty</div>
+            <div class="ml-2 font-bold text-2xl">{{ appName }}</div>
         </Link>
         <div
             class="flex flex-col items-center bg-indigo-100 border border-gray-200 mt-4 w-full py-6 px-4 rounded-lg"
