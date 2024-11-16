@@ -102,6 +102,8 @@ const submit = () => {
 };
 
 const replyMessage = async (id, message) => {
+    textInput.value.focus(); // auto focus on text input when replying
+    
     replyMessageText.value = message;
     form.replyMessageId = id;
 };
@@ -193,7 +195,7 @@ onMounted(() => {
         .listen("ChatMessageSent", async (response) => {
             const res = await addSeenByUser();
             messages.value.push(res.data.data);
-            console.log(response);
+            // console.log(response);
             
         })
         .listenForWhisper("typing", (response) => {
@@ -530,6 +532,9 @@ onBeforeUnmount(() => {
                 <p class="text-2xl font-bold">No messages</p>
             </div>
         </div>
+        <small v-if="isUserTyping"  class="text-gray-600 mb-2 ml-3">
+            {{ typingUserName }} is typing...
+        </small>
         <div
             class="block ml-3 text-sm bg-indigo-200 py-2 px-4 mb-1 shadow rounded-xl"
             v-if="replyMessageText"
@@ -610,9 +615,6 @@ onBeforeUnmount(() => {
                         </button>
                     </div>
 
-                    <small v-if="isUserTyping" class="text-gray-600 mt-5">
-                        {{ typingUserName }} is typing...
-                    </small>
                 </div>
                 <div class="ml-4 relative">
                     <VueChatEmojiComponent
