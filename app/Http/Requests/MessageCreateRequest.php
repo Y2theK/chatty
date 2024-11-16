@@ -22,7 +22,8 @@ class MessageCreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'message' => 'required|string|max:255'
+            'message' => 'required|string|max:255',
+            'replyMessageId' => 'nullable|exists:chat_messages,id'
         ];
     }
 }

@@ -10,7 +10,10 @@ import {
     LogOut,
     Plus,
     Trash,
-    CheckCheck
+    CheckCheck,
+    Reply,
+    Cross,
+    CircleX,
 } from "lucide-vue-next";
 
 import {
@@ -46,6 +49,7 @@ const props = defineProps({
 });
 const form = useForm({
     message: "",
+    replyMessageId: null,
 });
 
 const addedEmail = ref("");
@@ -81,14 +85,29 @@ const selectedEmoji = async (args) => {
     input.focus();
 };
 
+const replyMessageText = ref("");
+
 // change to axios request later
 const submit = () => {
     if (form.message) {
         form.post(route("messages.store", props.conversation.id), {
             message: form.message,
-            onFinish: () => (form.message = ""),
+            replyMessageId: form.replyMessageId,
+            onFinish: () => {
+                form.message = "";
+                replyMessageText.value = "";
+            },
         });
     }
+};
+
+const replyMessage = async (id, message) => {
+    replyMessageText.value = message;
+    form.replyMessageId = id;
+};
+
+const deleteReplyMessage = () => {
+    replyMessageText.value = "";
 };
 const inviteToGroup = async () => {
     if (addedEmail.value.trim() !== "") {
@@ -167,7 +186,6 @@ const scrollToHeight = () => {
     });
 };
 
-
 onMounted(() => {
     scrollToHeight();
 
@@ -175,6 +193,8 @@ onMounted(() => {
         .listen("ChatMessageSent", async (response) => {
             const res = await addSeenByUser();
             messages.value.push(res.data.data);
+            console.log(response);
+            
         })
         .listenForWhisper("typing", (response) => {
             isUserTyping.value = response.userID !== props.auth.user.id;
@@ -376,30 +396,59 @@ onBeforeUnmount(() => {
                                     class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
                                 ></span>
                             </div>
-                            <div
-                               
-                                class="mr-3 group flex items-center gap-2"
-                            >
+                            <div class="mr-3 group flex items-center gap-2">
                                 <div>
-                                    <Trash class="w-4 h-4 cursor-pointer hidden group-hover:block"  @click="deleteMessage(message.id)"/>
+                                    <Reply
+                                        class="w-4 h-4 cursor-pointer hidden group-hover:block"
+                                        @click="
+                                            replyMessage(
+                                                message.id,
+                                                message.message
+                                            )
+                                        "
+                                    />
                                 </div>
-                                <div  :id="'message-' + message.id" class="relative text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between">
-                                       <div>
-                                            <p>
-                                                {{ message.message }}
-                                            </p>
-                                            <p class="text-end">
-                                                <small>{{
-                                                    moment(
-                                                        message.created_at
-                                                    ).format("hh:mm a")
-                                                }}</small>
-                                            <small class="px-2"> 
-                                                <CheckCheck class="w-3 h-3 inline-block"  :class="[message.seen_by ? 'text-green-500' : '' ]"/>
+                                <div>
+                                    <Trash
+                                        class="w-4 h-4 cursor-pointer hidden group-hover:block"
+                                        @click="deleteMessage(message.id)"
+                                    />
+                                </div>
+
+                                <div
+                                    :id="'message-' + message.id"
+                                    class="relative text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between"
+                                >
+                                   
+                                    <div>
+                                        <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
+                                        <small class="">
+                                            {{ message.reply?.message }}
+                                        </small>
+                                        <Reply class="w-4 h-4" />
+                                        </a>
+                                        <p>
+                                            {{ message.message }}
+                                        </p>
+                                        <p class="text-end">
+                                            <small>{{
+                                                moment(
+                                                    message.created_at
+                                                ).format("hh:mm a")
+                                            }}</small>
+                                            <small class="px-2">
+                                                <CheckCheck
+                                                    class="w-3 h-3 inline-block"
+                                                    :class="[
+                                                        message.seen_by
+                                                            ? 'text-green-500'
+                                                            : '',
+                                                    ]"
+                                                />
                                             </small>
-                                            </p>
-                                       </div>
+                                        </p>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -429,10 +478,16 @@ onBeforeUnmount(() => {
                                     class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
                                 ></span>
                             </div>
-                            <div
-                                class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl"
-                            >
-                                <div>
+                            <div class="flex justify-between items-center group gap-2">
+                                <div :id="'message-' + message.id"
+                                    class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl"
+                                >
+                                <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
+                                    <Reply class="w-4 h-4" />
+                                        <small class="">
+                                            {{ message.reply?.message }}
+                                        </small>
+                                        </a>
                                     <p>
                                         {{ message.message }}
                                     </p>
@@ -443,6 +498,25 @@ onBeforeUnmount(() => {
                                             )
                                         }}</small>
                                     </p>
+                                </div>
+                                <div class="mr-3 flex items-center gap-2">
+                                    <div>
+                                        <Reply
+                                            class="w-4 h-4 cursor-pointer hidden group-hover:block"
+                                            @click="
+                                                replyMessage(
+                                                    message.id,
+                                                    message.message
+                                                )
+                                            "
+                                        />
+                                    </div>
+                                    <div>
+                                        <Trash
+                                            class="w-4 h-4 cursor-pointer hidden group-hover:block"
+                                            @click="deleteMessage(message.id)"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -455,6 +529,24 @@ onBeforeUnmount(() => {
             >
                 <p class="text-2xl font-bold">No messages</p>
             </div>
+        </div>
+        <div
+            class="block ml-3 text-sm bg-indigo-200 py-2 px-4 mb-1 shadow rounded-xl"
+            v-if="replyMessageText"
+        >
+            <div class="flex justify-between items-center font-bold">
+                <div class="flex items-center">
+                    <Reply class="w-4 h-4 mr-2" />
+                    <p>Replying to</p>
+                </div>
+                <CircleX
+                    class="w-4 h-4 cursor-pointer"
+                    @click="deleteReplyMessage"
+                />
+            </div>
+            <small>
+                {{ replyMessageText }}
+            </small>
         </div>
         <div
             class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"

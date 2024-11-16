@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/conversations/{conversation}/messages/add-seen-by', [ChatMessageController::class, 'addSeenBy'])->name('messages.add_seen_by'); // message store
     Route::post('/conversations/{conversation}/messages', [ChatMessageController::class, 'store'])->name('messages.store'); // message store
     Route::delete('/conversations/{conversation}/messages/{message}', [ChatMessageController::class, 'destroy'])->name('messages.destroy'); // message delete
+    Route::post('/conversations/{conversation}/messages/{message}/reply', [ChatMessageController::class, 'reply'])->name('messages.reply'); // message reply
 
     Route::post('/users/updateLastActiveAt', [UserController::class, 'updateLastActiveAt'])->name('conversations.updateLastActiveAt'); // update updateLastActiveAt
 

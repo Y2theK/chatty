@@ -17,12 +17,12 @@ class ChatMessageController extends Controller
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
-        $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
+        $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message,$request->replyMessageId);
 
         $conversation->update(['updated_at' => now()]);
         
         // chat message sending in real time
-        broadcast(new ChatMessageSent($message->load('user:id,name,image')))->toOthers(); 
+        broadcast(new ChatMessageSent($message->load(['user:id,name,last_active_at,image','reply'])));
         
         // conversation updating in real time , to move to the top of coversations lists in sidebars
         broadcast(new ConversationUpdate($conversation->load(['users:id,name,last_active_at,image','latestMessage'])))->toOthers(); 
@@ -61,7 +61,7 @@ class ChatMessageController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Added Seenby",
-            'data' => $conversation->latestMessage->load('user:id,name,last_active_at,image')
+            'data' => $conversation->latestMessage->load(['user:id,name,last_active_at,image','reply'])
         ]);
     }
   

@@ -9,12 +9,13 @@ use App\Models\Message;
 
 class ChatMessageService
 {
-    public function createMessage(User $user,Conversation $conversation,string $message) : ChatMessage
+    public function createMessage(User $user,Conversation $conversation,string $message,int $replyMessage = null) : ChatMessage
     {
         $chatMessage = ChatMessage::create([
             'user_id' => $user->id,
             'conversation_id' => $conversation->id,
             'message' => $message,
+            'chat_message_id' => $replyMessage
         ]);
 
         return $chatMessage;

@@ -37,8 +37,8 @@ class ConversationController extends Controller
         }
 
         $conversations = $this->conversationService->getuserConversation($user);      
-        $messages = ChatMessage::with('user:id,name,image')->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
-
+        $messages = ChatMessage::with(['user:id,name,image','reply'])->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
+        // dd($messages);
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
             'messages' => $messages,
