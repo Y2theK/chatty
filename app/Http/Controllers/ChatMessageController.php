@@ -13,16 +13,21 @@ use Illuminate\Broadcasting\PrivateChannel;
 
 class ChatMessageController extends Controller
 {
-    public function store(MessageCreateRequest $request,Conversation $conversation,ChatMessageService $chatMessageService)
+    public function __construct(protected ChatMessageService $chatMessageService)
     {
+        
+    }
+    public function store(MessageCreateRequest $request,Conversation $conversation)
+    {
+
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
-        $message = $chatMessageService->createMessage(auth()->user(),$conversation,$request->message,$request->replyMessageId);
+        $message = $this->chatMessageService->createMessage(auth()->user(),$conversation,$request->validated());
 
         $conversation->update(['updated_at' => now()]);
         
         // chat message sending in real time
-        broadcast(new ChatMessageSent($message->load(['user:id,name,last_active_at,image','reply'])));
+        broadcast(new ChatMessageSent($this->chatMessageService->loadMessageRelationData($message)));
         
         // conversation updating in real time , to move to the top of coversations lists in sidebars
         broadcast(new ConversationUpdate($conversation->load(['users:id,name,last_active_at,image','latestMessage'])))->toOthers(); 
@@ -34,25 +39,21 @@ class ChatMessageController extends Controller
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
-        $message = ChatMessage::where([
-            'user_id' => auth()->id(),
-            'conversation_id' => $conversation->id,
-            'id' => $message->id
-        ])->delete();
+       $this->chatMessageService->deleteMessage($conversation,$message);
         
         return response()->json([
             'success' => true,
             'message' => "Deleted Message"
         ]);
     }
-    public function addSeenBy(Conversation $conversation,ChatMessageService $chatMessageService)
+    public function addSeenBy(Conversation $conversation)
     {
         abort_if(!isUserContainsInConversation(auth()->user(),$conversation->id),403);
 
         $user = auth()->user();
         //update seen by to latestMessage if user enter to the conversation
         if($conversation->latestMessage){
-            $chatMessageService->addSeenByUser($conversation->latestMessage,$user);
+            $this->chatMessageService->addSeenByUser($conversation->latestMessage,$user);
         }
 
         // to indicate (font bold) if the conversation latestMessage is not seen
@@ -61,7 +62,7 @@ class ChatMessageController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Added Seenby",
-            'data' => $conversation->latestMessage->load(['user:id,name,last_active_at,image','reply'])
+            'data' =>$this->chatMessageService->loadMessageRelationData($conversation->latestMessage)
         ]);
     }
   

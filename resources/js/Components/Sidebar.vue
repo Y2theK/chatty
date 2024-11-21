@@ -422,7 +422,7 @@ const fetchUsers = async () => {
                                         class="flex"
                                         v-if="conversation.latest_message"
                                         >{{
-                                            conversation.latest_message.message.slice(
+                                            conversation.latest_message.message?.slice(
                                                 0,
                                                 20
                                             )

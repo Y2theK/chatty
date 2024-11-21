@@ -24,4 +24,9 @@ class ChatMessage extends Model
     {
         return $this->belongsTo(ChatMessage::class,'chat_message_id','id');
     }
+
+    public function upload() : BelongsTo
+    {
+        return $this->belongsTo(Upload::class);
+    }
 }

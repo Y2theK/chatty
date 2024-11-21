@@ -37,7 +37,7 @@ class ConversationController extends Controller
         }
 
         $conversations = $this->conversationService->getuserConversation($user);      
-        $messages = ChatMessage::with(['user:id,name,image','reply'])->where('conversation_id',$conversation->id)->orderBy('created_at','desc')->paginate(50);
+        $messages = $chatMessageService->getMessages($conversation);
         // dd($messages);
         return Inertia::render('Chat/Chat',[
             'conversations' => $conversations,
@@ -78,7 +78,7 @@ class ConversationController extends Controller
         }
                                                         
         if($request->message){
-            $chatMessageService->createMessage(auth()->user(),$conversation,$request->message);
+            $chatMessageService->createMessage(auth()->user(),$conversation,$request->validated());
         }
         // boradcase noti
 

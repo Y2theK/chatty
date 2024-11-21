@@ -14,6 +14,7 @@ import {
     Reply,
     Cross,
     CircleX,
+    Download,
 } from "lucide-vue-next";
 
 import {
@@ -48,7 +49,8 @@ const props = defineProps({
     },
 });
 const form = useForm({
-    message: "",
+    message: null,
+    file: null,
     replyMessageId: null,
 });
 
@@ -87,15 +89,27 @@ const selectedEmoji = async (args) => {
 
 const replyMessageText = ref("");
 
+// preview image snippet
+const previewImage = ref(null);
+
+const loadPreviewFile = (event) => {
+   const file = event.target.files[0];   
+   previewImage.value = URL.createObjectURL(file);   
+}
+
 // change to axios request later
 const submit = () => {
-    if (form.message) {
+        
+    if (form.message || form.file) {
         form.post(route("messages.store", props.conversation.id), {
             message: form.message,
             replyMessageId: form.replyMessageId,
+            file : form.file,
             onFinish: () => {
-                form.message = "";
-                replyMessageText.value = "";
+                form.message = null;
+                replyMessageText.value = null;
+                form.replyMessageId = null;
+                form.file = null;
             },
         });
     }
@@ -104,7 +118,7 @@ const submit = () => {
 const replyMessage = async (id, message) => {
     textInput.value.focus(); // auto focus on text input when replying
     
-    replyMessageText.value = message;
+    replyMessageText.value = message ?? 'File Message';
     form.replyMessageId = id;
 };
 
@@ -421,14 +435,32 @@ onBeforeUnmount(() => {
                                     :id="'message-' + message.id"
                                     class="relative text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between"
                                 >
-                                   
                                     <div>
                                         <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
                                         <small class="">
-                                            {{ message.reply?.message }}
+                                            {{ message.reply?.message ?? 'File Messsage'}}
                                         </small>
                                         <Reply class="w-4 h-4" />
                                         </a>
+                                        <div v-if="message.upload" class="mt-3">
+                                            <div v-if="message.upload.type === 'image'">
+                                                <img :src="'/'+message.upload.file_name" alt="" width="300px" height="300px">
+                                            </div>
+                                            <div v-else-if="message.upload.type === 'video'">
+                                                <video src="'/'+message.upload.file_name"  width="300px" height="300px"></video>
+                                            </div>
+                                            <div v-else-if="message.upload.type === 'audio'">
+                                                <audio src="'/'+message.upload.file_name"  width="300px" height="300px"></audio>
+                                            </div>
+                                            <div v-else>
+                                                <a :href="'/'+message.upload.file_name" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
+                                                    <Download
+                                                        class="w-4 h-4 cursor-pointer"
+                                                    />
+                                                    {{ message.upload.file_original_name }}
+                                                </a>
+                                            </div>
+                                        </div>
                                         <p>
                                             {{ message.message }}
                                         </p>
@@ -487,9 +519,34 @@ onBeforeUnmount(() => {
                                 <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
                                     <Reply class="w-4 h-4" />
                                         <small class="">
-                                            {{ message.reply?.message }}
+                                            {{ message.reply?.message ?? 'File Messsage' }}
                                         </small>
                                         </a>
+
+                                        <div v-if="message.upload" class="mt-3">
+
+                                            <div v-if="message.upload.type === 'image'">
+                                                <img :src="'/'+message.upload.file_name" alt="" width="300px" height="300px">
+                                            </div>
+                                            <div v-else-if="message.upload.type === 'video'">
+                                                <video width="320" height="240" controls>
+                                                    <source :src="'/'+message.upload.file_name">
+                                                </video>                                            
+                                            </div>
+                                            <div v-else-if="message.upload.type === 'audio'">
+                                                <audio controls>
+                                                    <source :src="'/'+message.upload.file_name" >
+                                                </audio>
+                                            </div>
+                                            <div v-else>
+                                                <a :href="'/'+message.upload.file_name" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
+                                                    <Download
+                                                        class="w-4 h-4 cursor-pointer"
+                                                    />
+                                                    {{ message.upload.file_original_name }}
+                                                </a>
+                                            </div>
+                                        </div>
                                     <p>
                                         {{ message.message }}
                                     </p>
@@ -514,10 +571,10 @@ onBeforeUnmount(() => {
                                         />
                                     </div>
                                     <div>
-                                        <Trash
+                                        <!-- <Trash
                                             class="w-4 h-4 cursor-pointer hidden group-hover:block"
                                             @click="deleteMessage(message.id)"
-                                        />
+                                        /> -->
                                     </div>
                                 </div>
                             </div>
@@ -556,10 +613,16 @@ onBeforeUnmount(() => {
         <div
             class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
         >
-            <div>
-                <button
-                    class="flex items-center justify-center text-gray-400 hover:text-gray-600"
-                >
+        
+            <form
+                @submit.prevent="submit"
+                class="flex justify-center items-center flex-grow"
+            >
+            <div class="">
+                <label
+                    class="flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
+                >        
+                <input type="file" class="hidden" @input="form.file = $event.target.files[0]" @change="submit();">
                     <svg
                         class="w-5 h-5"
                         fill="none"
@@ -574,13 +637,8 @@ onBeforeUnmount(() => {
                             d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                         ></path>
                     </svg>
-                </button>
-            </div>
-
-            <form
-                @submit.prevent="submit"
-                class="flex justify-center items-center flex-grow"
-            >
+                </label>
+            </div>            
                 <div class="ml-4 flex-grow">
                     <div class="relative w-full py-2">
                         <input
