@@ -46,10 +46,12 @@ class ChatMessageService
     }
     public function deleteMessage(Conversation $conversation,ChatMessage $message)
     {
-        $imageService = new FileUploadService;
+        if($message->upload){
+            $imageService = new FileUploadService;
 
-        $imageService->delete($message->upload,'public');
-
+            $imageService->delete($message->upload,'public');
+        }
+      
         $message = ChatMessage::where([
             'user_id' => auth()->id(),
             'conversation_id' => $conversation->id,
