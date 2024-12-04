@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\ImageUploadService;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\Request;
-use App\Services\ImageUploadService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Redirect;
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class ProfileController extends Controller
 {
@@ -28,30 +28,29 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request,ImageUploadService $imageService): RedirectResponse
+    public function update(ProfileUpdateRequest $request, ImageUploadService $imageService): RedirectResponse
     {
         $user = $request->user();
 
         $user->name = $request->name;
         $user->email = $request->email;
-        
+
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
-        if($request->image)
-        {
-            if($user->image){
-                $imageService->delete($user->image,'public');
+        if ($request->image) {
+            if ($user->image) {
+                $imageService->delete($user->image, 'public');
             }
-    
+
             $path = 'profiles/';
 
-            $imageName = $imageService->upload($request->image,$path,'public');
+            $imageName = $imageService->upload($request->image, $path, 'public');
 
-            $user->image = $path . $imageName;
+            $user->image = $path.$imageName;
         }
-        
+
         $user->save();
 
         return Redirect::route('profile.edit');

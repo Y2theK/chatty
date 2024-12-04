@@ -24,7 +24,7 @@ class MessageCreateRequest extends FormRequest
         return [
             'message' => 'nullable|string|max:255',
             'replyMessageId' => 'nullable|exists:chat_messages,id',
-            'file' => 'nullable|file|max:2048'
+            'file' => 'nullable|file|max:2048',
         ];
     }
 }

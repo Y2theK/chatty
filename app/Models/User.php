@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'last_active_at',
-        'image'
+        'image',
     ];
 
     protected $likeFilterFields = [
@@ -61,19 +61,19 @@ class User extends Authenticatable
     {
         return $value ? asset($value) : null;
     }
-    public function chats() : HasMany
+
+    public function chats(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
     }
 
-    public function conversations() : BelongsToMany
+    public function conversations(): BelongsToMany
     {
         return $this->belongsToMany(Conversation::class)->distinct();
     }
 
-    public function groups() : BelongsToMany
+    public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Conversation::class)->distinct();
     }
-    
 }

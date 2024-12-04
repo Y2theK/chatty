@@ -12,24 +12,25 @@ class Conversation extends Model
     protected $fillable = [
         'name',
         'is_group',
-        'updated_at'
+        'updated_at',
     ];
-    public function usersExceptAuth() : BelongsToMany
+
+    public function usersExceptAuth(): BelongsToMany
     {
-        return $this->belongsToMany(User::class)->whereNot('user_id',auth()->id())->distinct();
+        return $this->belongsToMany(User::class)->whereNot('user_id', auth()->id())->distinct();
     }
-   
-    public function users() : BelongsToMany
+
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->distinct();
     }
 
-    public function messages() : HasMany
+    public function messages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
     }
 
-    public function latestMessage() : HasOne
+    public function latestMessage(): HasOne
     {
         return $this->hasOne(ChatMessage::class)->latestOfMany();
     }

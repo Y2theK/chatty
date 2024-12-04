@@ -3,15 +3,11 @@
 namespace App\Events;
 
 use App\Models\Conversation;
-use Laravel\Reverb\Loggers\Log;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 class ConversationUpdate implements ShouldBroadcastNow
 {
@@ -33,7 +29,8 @@ class ConversationUpdate implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         $users = $this->conversation->users->pluck('id');
-        return $users->map(fn($userId) => new PrivateChannel('user.' . $userId))->all();
-       
+
+        return $users->map(fn ($userId) => new PrivateChannel('user.'.$userId))->all();
+
     }
 }

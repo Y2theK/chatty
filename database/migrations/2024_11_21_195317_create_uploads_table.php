@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('file_original_name')->nullable();
             $table->foreignId('user_id')->constrained()->nullable();
             $table->integer('file_size')->nullable();
-            $table->string('extension',10)->nullable();
-            $table->string('type',20)->nullable();
+            $table->string('extension', 10)->nullable();
+            $table->string('type', 20)->nullable();
             $table->string('external_link')->nullable();
             $table->timestamps();
         });

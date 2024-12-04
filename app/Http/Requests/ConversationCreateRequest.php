@@ -23,7 +23,7 @@ class ConversationCreateRequest extends FormRequest
     {
         return [
             'email' => 'required|email|exists:users,email',
-            'message' => 'nullable|string|max:255'
+            'message' => 'nullable|string|max:255',
         ];
     }
 }

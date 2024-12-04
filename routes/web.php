@@ -1,15 +1,12 @@
 <?php
 
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ConversationController;
-use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -23,7 +20,6 @@ Route::get('/', function () {
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -47,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/users/updateLastActiveAt', [UserController::class, 'updateLastActiveAt'])->name('conversations.updateLastActiveAt'); // update updateLastActiveAt
 
-    Route::get('users',[UserController::class,'index'])->name('users.index');
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
 
 });
 

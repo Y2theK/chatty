@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index(Request $request,UserService $userService)
+    public function index(Request $request, UserService $userService)
     {
         $users = $userService->getUsers($request->all());
 
@@ -18,12 +18,12 @@ class UserController extends Controller
     {
 
         auth()->user()->update([
-            'last_active_at' => now()
+            'last_active_at' => now(),
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => "Updated Last Active At."
+            'message' => 'Updated Last Active At.',
         ]);
     }
 }
