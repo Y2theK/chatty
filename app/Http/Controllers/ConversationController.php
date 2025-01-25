@@ -34,7 +34,11 @@ class ConversationController extends Controller
         $user = auth()->user();
         //update seen by to latestMessage if user enter to the conversation
         if ($conversation->latestMessage) {
-            $chatMessageService->addSeenByUser($conversation->latestMessage, $user);
+            /** @var \App\Models\ChatMessage $latestMessage */
+            $latestMessage = $conversation->latestMessage;
+
+            $chatMessageService->addSeenByUser($latestMessage, $user);
+            // $chatMessageService->addSeenByUser($conversation->latestMessage, $user);
         }
 
         $conversations = $this->conversationService->getuserConversation($user);

@@ -76,8 +76,8 @@ const updateCursorPosition = (event) => {
 const selectedEmoji = async (args) => {
     const input = textInput.value;
     const emoji = args.unicode;
-    const before = form.message.slice(0, cursorPosition.value);
-    const after = form.message.slice(cursorPosition.value);
+    const before = form.message ? form.message.slice(0, cursorPosition.value) : '';
+    const after = form.message ? form.message.slice(cursorPosition.value) : '';
     form.message = before + emoji + after;
 
     // Update cursor position after emoji insertion

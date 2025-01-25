@@ -48,9 +48,14 @@ class ChatMessageController extends Controller
         abort_if(! isUserContainsInConversation(auth()->user(), $conversation->id), 403);
 
         $user = auth()->user();
+
+        /** @var \App\Models\ChatMessage $latestMessage */
+        $latestMessage = $conversation->latestMessage;
+
         //update seen by to latestMessage if user enter to the conversation
         if ($conversation->latestMessage) {
-            $this->chatMessageService->addSeenByUser($conversation->latestMessage, $user);
+            $this->chatMessageService->addSeenByUser($latestMessage, $user);
+            // $this->chatMessageService->addSeenByUser($conversation->latestMessage, $user);
         }
 
         // to indicate (font bold) if the conversation latestMessage is not seen
@@ -59,7 +64,7 @@ class ChatMessageController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Added Seenby',
-            'data' => $this->chatMessageService->loadMessageRelationData($conversation->latestMessage),
+            'data' => $this->chatMessageService->loadMessageRelationData($latestMessage),
         ]);
     }
 }

@@ -48,7 +48,9 @@ class ChatMessageService
         if ($message->upload) {
             $imageService = new FileUploadService;
 
-            $imageService->delete($message->upload, 'public');
+            /** @var \App\Models\Upload $upload */
+            $upload = $message->upload;
+            $imageService->delete($upload, 'public');
         }
 
         $message = ChatMessage::where([
@@ -60,7 +62,7 @@ class ChatMessageService
         return $message;
     }
 
-    public function addSeenByUser(ChatMessage $message, User $user): ChatMessage
+    public function addSeenByUser(?ChatMessage $message, User $user): ChatMessage
     {
         $seen_by = $message->seen_by;
         $seen_by_array = explode(',', $seen_by);
