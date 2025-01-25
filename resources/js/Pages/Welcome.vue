@@ -38,7 +38,7 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
         <img
             id="background"
             class="absolute -left-20 top-0 max-w-[877px]"
-            src="https://laravel.com/assets/img/welcome/background.svg"
+            src="/images/background.svg"
         />
         <div
             class="relative flex min-h-screen flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white"
