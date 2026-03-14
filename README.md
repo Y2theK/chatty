@@ -14,13 +14,13 @@ Chatty is small a real time messaging app providing seemless experience of chatt
 - [x] Profile management
 - [x] Responsive
 - [x] Message delete, forward and reply
+- [X] Support Image, Video, and links in conversation
 
 
 ### Tech Stacks:
 `Laravel 11` `sqlite` `vue 3` `laravel-reverb` `tailwindcss` `shadcn-vue` `inertia` `axios` `laravel-breeeze` `laravel-echo`
 
 ### Coming soon
-- [ ] Support Image, Video, and links in conversation
 - [ ] Video Call & Audio Call
 
 ### Screenshots
@@ -43,7 +43,7 @@ cp .env.example .env
 ```
 
 ```shell
-Setup databases in .env file
+touch database/database.sqlite
 ```
 
 ```shell
@@ -69,4 +69,14 @@ php artisan serve
 ```shell
 php artisan reverb:start
 ```
+
+### Demo Credentials
+
+| Name | Email | Password |
+|---|---|---|
+| Alice Johnson | alice@demo.com | password |
+| Bob Smith | bob@demo.com | password |
+| Carol White | carol@demo.com | password |
+
+> All users share the same password: `password`
 
