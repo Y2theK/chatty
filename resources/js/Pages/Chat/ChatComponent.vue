@@ -53,7 +53,6 @@
   <script setup>
     import { ref, onMounted, watch, nextTick, onUnmounted, onBeforeUnmount } from 'vue';
     import axios from 'axios';
-    import Echo from 'laravel-echo';
   
     const props = defineProps({
         user: {

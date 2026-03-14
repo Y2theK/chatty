@@ -1,46 +1,58 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import Chat from "@/Pages/Chat/Chat.vue";
+import Sidebar from "@/Components/Sidebar.vue";
+import { Toaster } from "@/components/ui/toast";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
-defineProps({
-    'users' : {
-        required: true
-    }
-})
+const props = defineProps({
+    conversations: {
+        required: true,
+    },
+  
+});
+
+const allOnlineUsers = ref([]);
+
+onMounted(() => {
+
+    window.Echo.join(`online`)
+        .here((users) => {
+            allOnlineUsers.value = users;
+        })
+        .joining((user) => {
+            allOnlineUsers.value.push(user);
+        })
+        .leaving((user) => {
+            allOnlineUsers.value = allOnlineUsers.value.filter(
+                (u) => u.id !== user.id
+            );
+        });        
+
+});
+
+onBeforeUnmount(() => {
+    window.Echo.leave(`online`, (user) => {
+        allOnlineUsers.value = onlineUser.value.filter((u) => u.id !== user.id);
+    });
+});
+
 </script>
 
 <template>
-    <Head title="Dashboard" />
-
     <AuthenticatedLayout>
-        <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Dashboard
-            </h2>
-        </template>
-
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800"
-                >
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        You're logged in!
-                    </div>
-                </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6 dark:bg-gray-800">
-                    <div class="p-6 text-gray-900">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 my-4" v-for="user in users" :key="user.id">
-                            <Link :href="route('chat.user',user)" class="bg-gray-100 dark:bg-gray-200 p-4 rounded-lg shadow-md block hover:bg-gray-200">
-                                <h3 class="text-lg font-semibold">{{ user.name }}</h3>
-                                <p>{{ user.email }}</p>
-                            </Link>
-                        </div>
+        <div class="flex h-screen antialiased text-slate-800">
+            <div class="flex flex-row h-full w-full overflow-x-hidden justify-center">
+                <Sidebar :conversations="conversations" :allOnlineUsers="allOnlineUsers" :class="[route().current('conversations.index') ? '' : 'hidden sm:flex']"></Sidebar>
+                <div class=" flex-col flex-auto h-full p-4 sm:p-6" :class="[route().current('conversations.index') ? 'hidden sm:flex' : '']">
+                    <div
+                        class="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-2"
+                    >
+                        <slot></slot>
                     </div>
                 </div>
             </div>
         </div>
+        <Toaster />
     </AuthenticatedLayout>
 </template>

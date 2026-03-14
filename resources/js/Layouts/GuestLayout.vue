@@ -12,11 +12,19 @@ import { Link } from '@inertiajs/vue3';
                 <ApplicationLogo class="h-20 w-20 fill-current text-gray-500" />
             </Link>
         </div>
-
+        
         <div
-            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800"
+            class="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800 "
         >
+            
             <slot />
+            <img
+                id="background"
+                class="absolute -left-20 top-0 max-w-[877px]"
+                src="/images/background.svg"
+            />
+            
         </div>
+
     </div>
 </template>
