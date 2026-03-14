@@ -43,7 +43,7 @@ cp .env.example .env
 ```
 
 ```shell
-Setup databases in .env file
+touch database/database.sqlite
 ```
 
 ```shell
@@ -69,4 +69,14 @@ php artisan serve
 ```shell
 php artisan reverb:start
 ```
+
+### Demo Credentials
+
+| Name | Email | Password |
+|---|---|---|
+| Alice Johnson | alice@demo.com | password |
+| Bob Smith | bob@demo.com | password |
+| Carol White | carol@demo.com | password |
+
+> All users share the same password: `password`
 
