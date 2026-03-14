@@ -78,5 +78,3 @@ php artisan reverb:start
 | Bob Smith | bob@demo.com | password |
 | Carol White | carol@demo.com | password |
 
-> All users share the same password: `password`
-

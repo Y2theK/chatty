@@ -16,6 +16,7 @@ import {
     Cross,
     CircleX,
     Download,
+    Video,
 } from "lucide-vue-next";
 
 import {
@@ -79,6 +80,7 @@ const isUserTypingTimer = ref(null);
 const users = ref([...props.conversation.users]);
 
 const open = ref(false);
+
 
 const cursorPosition = ref(0);
 const textInput = ref(null);
@@ -178,6 +180,35 @@ const leaveGroup = async () => {
     }
 };
 
+const activeRoom = ref(null); // { roomName, conversationId } — set when user left without ending
+
+const startCall = async () => {
+    const res = await axios.post(`/conversations/${props.conversation.id}/call/start`);
+    window.dispatchEvent(new CustomEvent('call:started', {
+        detail: {
+            token: res.data.token,
+            livekitUrl: res.data.livekit_url,
+            roomName: res.data.room_name,
+            conversationId: props.conversation.id,
+        },
+    }));
+};
+
+const rejoinCall = async () => {
+    const res = await axios.post(`/conversations/${props.conversation.id}/call/join`, {
+        room_name: activeRoom.value.roomName,
+    });
+    window.dispatchEvent(new CustomEvent('call:started', {
+        detail: {
+            token: res.data.token,
+            livekitUrl: res.data.livekit_url,
+            roomName: res.data.room_name,
+            conversationId: props.conversation.id,
+        },
+    }));
+};
+
+
 const addSeenByUser = async () => {
     try {
         const response = await axios.post(
@@ -224,7 +255,11 @@ onMounted(() => {
             const res = await addSeenByUser();
             messages.value.push(res.data.data);
             // console.log(response);
-            
+
+        })
+        .listen("CallEnded", () => {
+            activeRoom.value = null;
+            window.dispatchEvent(new CustomEvent('call:ended'));
         })
         .listenForWhisper("typing", (response) => {
             isUserTyping.value = response.userID !== props.auth.user.id;
@@ -238,6 +273,16 @@ onMounted(() => {
                 isUserTyping.value = false;
             }, 1000);
         });
+
+    window.addEventListener('call:left', (e) => {
+        if (e.detail.conversationId === props.conversation.id) {
+            activeRoom.value = { roomName: e.detail.roomName, conversationId: e.detail.conversationId };
+        }
+    });
+
+    window.addEventListener('call:ended', () => {
+        activeRoom.value = null;
+    });
 
     window.Echo.join(`online`)
         .here((users) => {
@@ -379,6 +424,12 @@ onBeforeUnmount(() => {
                         </div>
                     </DialogContent>
                 </Dialog>
+                <Button v-if="activeRoom && activeRoom.conversationId === conversation.id" variant="outline" class="text-green-600 border-green-400" @click="rejoinCall">
+                    <Video class="w-4 h-4" />Rejoin
+                </Button>
+                <Button v-else variant="outline" @click="startCall">
+                    <Video class="w-4 h-4" />Call
+                </Button>
                 <Button variant="outline" class="" @click="leaveGroup">
                     <LogOut class="w-4 h-4" />Leave
                 </Button>
@@ -390,10 +441,24 @@ onBeforeUnmount(() => {
             ref="messageContainer"
         >
             <div class="flex flex-col h-full" v-if="messages.length">
+                <template v-for="message in messages" :key="message.id">
+
+                <!-- System message (e.g. Video call ended) -->
                 <div
+                    v-if="message.type === 'system'"
+                    class="flex justify-center my-2"
+                >
+                    <div class="flex items-center gap-2 bg-gray-100 text-gray-500 text-xs px-4 py-1.5 rounded-full">
+                        <Video class="w-3 h-3" />
+                        <span>{{ message.message }}</span>
+                        <span>· {{ moment(message.created_at).format('hh:mm a') }}</span>
+                    </div>
+                </div>
+
+                <!-- Regular chat message -->
+                <div
+                    v-else
                     class="grid grid-cols-12 gap-y-2"
-                    v-for="message in messages"
-                    :key="message.id"
                 >
                     <div
                         class="col-start-6 col-end-13 p-3 rounded-lg"
@@ -595,6 +660,8 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
                 </div>
+
+                </template>
             </div>
             <div
                 class="flex flex-col h-full justify-center items-center"
