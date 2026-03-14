@@ -6,6 +6,7 @@ use App\Models\ChatMessage;
 use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Validation\ValidationException;
 
 class ChatMessageService
 {
@@ -28,7 +29,13 @@ class ChatMessageService
         if ($data['file']) {
             $path = 'conversations/';
             $imageService = new FileUploadService;
-            $uploadId = $imageService->upload($data['file'], $path, 'public');
+            $uploadId = $imageService->upload($data['file'], $path, 'local');
+
+            if ($uploadId === null) {
+                throw ValidationException::withMessages([
+                    'file' => 'Invalid file format.',
+                ]);
+            }
         }
 
         $chatMessage = ChatMessage::create([
@@ -50,7 +57,7 @@ class ChatMessageService
 
             /** @var \App\Models\Upload $upload */
             $upload = $message->upload;
-            $imageService->delete($upload, 'public');
+            $imageService->delete($upload, 'local');
         }
 
         $message = ChatMessage::where([

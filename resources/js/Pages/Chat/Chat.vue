@@ -2,6 +2,7 @@
 import Dashboard from "@/Pages/Dashboard.vue";
 import { useForm } from "@inertiajs/vue3";
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
 import {
@@ -48,10 +49,23 @@ const props = defineProps({
         require: true,
     },
 });
+const { toast } = useToast();
+
 const form = useForm({
     message: null,
     file: null,
     replyMessageId: null,
+});
+
+watch(() => form.errors.file, (error) => {
+    if (error) {
+        toast({
+            title: "Invalid file format",
+            description: "The file you selected is not supported. Please upload an image, video, audio, document, or archive.",
+            variant: "destructive",
+        });
+        form.file = null;
+    }
 });
 
 const addedEmail = ref("");
@@ -444,16 +458,16 @@ onBeforeUnmount(() => {
                                         </a>
                                         <div v-if="message.upload" class="mt-3">
                                             <div v-if="message.upload.type === 'image'">
-                                                <img :src="'/'+message.upload.file_name" alt="" width="300px" height="300px">
+                                                <img :src="'/uploads/'+message.upload.id" alt="" width="300px" height="300px">
                                             </div>
                                             <div v-else-if="message.upload.type === 'video'">
-                                                <video src="'/'+message.upload.file_name"  width="300px" height="300px"></video>
+                                                <video :src="'/uploads/'+message.upload.id"  width="300px" height="300px" controls></video>
                                             </div>
                                             <div v-else-if="message.upload.type === 'audio'">
-                                                <audio src="'/'+message.upload.file_name"  width="300px" height="300px"></audio>
+                                                <audio :src="'/uploads/'+message.upload.id"  width="300px" height="300px" controls></audio>
                                             </div>
                                             <div v-else>
-                                                <a :href="'/'+message.upload.file_name" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
+                                                <a :href="'/uploads/'+message.upload.id" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
                                                     <Download
                                                         class="w-4 h-4 cursor-pointer"
                                                     />
@@ -526,20 +540,20 @@ onBeforeUnmount(() => {
                                         <div v-if="message.upload" class="mt-3">
 
                                             <div v-if="message.upload.type === 'image'">
-                                                <img :src="'/'+message.upload.file_name" alt="" width="300px" height="300px">
+                                                <img :src="'/uploads/'+message.upload.id" alt="" width="300px" height="300px">
                                             </div>
                                             <div v-else-if="message.upload.type === 'video'">
                                                 <video width="320" height="240" controls>
-                                                    <source :src="'/'+message.upload.file_name">
+                                                    <source :src="'/uploads/'+message.upload.id">
                                                 </video>                                            
                                             </div>
                                             <div v-else-if="message.upload.type === 'audio'">
                                                 <audio controls>
-                                                    <source :src="'/'+message.upload.file_name" >
+                                                    <source :src="'/uploads/'+message.upload.id" >
                                                 </audio>
                                             </div>
                                             <div v-else>
-                                                <a :href="'/'+message.upload.file_name" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
+                                                <a :href="'/uploads/'+message.upload.id" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
                                                     <Download
                                                         class="w-4 h-4 cursor-pointer"
                                                     />
@@ -621,8 +635,8 @@ onBeforeUnmount(() => {
             <div class="">
                 <label
                     class="flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
-                >        
-                <input type="file" class="hidden" @input="form.file = $event.target.files[0]" @change="submit();">
+                >
+                <input type="file" accept="" class="hidden" @input="form.file = $event.target.files[0]" @change="submit();">
                     <svg
                         class="w-5 h-5"
                         fill="none"
@@ -638,7 +652,7 @@ onBeforeUnmount(() => {
                         ></path>
                     </svg>
                 </label>
-            </div>            
+            </div>
                 <div class="ml-4 flex-grow">
                     <div class="relative w-full py-2">
                         <input

@@ -50,9 +50,10 @@ class FileUploadService
         $extension = $file->extension();
         if (isset($type[$extension])) {
             $imageName = time().'.'.$extension;
+            $relativePath = $path.$imageName;
 
             $upload = new Upload;
-            $upload->file_name = $path.$imageName;
+            $upload->file_name = $relativePath;
             $upload->file_original_name = $file->getClientOriginalName();
             $upload->extension = $extension;
             $upload->user_id = auth()->id();
@@ -69,7 +70,7 @@ class FileUploadService
 
     }
 
-    public function delete(Upload $upload, string $disk = 'public'): bool
+    public function delete(Upload $upload, string $disk = 'local'): bool
     {
         Storage::disk($disk)->delete($upload->file_name);
 

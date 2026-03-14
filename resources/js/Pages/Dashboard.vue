@@ -2,6 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import Chat from "@/Pages/Chat/Chat.vue";
 import Sidebar from "@/Components/Sidebar.vue";
+import { Toaster } from "@/components/ui/toast";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 
 const props = defineProps({
@@ -52,5 +53,6 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </div>
+        <Toaster />
     </AuthenticatedLayout>
 </template>
