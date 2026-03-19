@@ -1,7 +1,7 @@
 <script setup>
 import Dashboard from "@/Pages/Dashboard.vue";
 import { useForm } from "@inertiajs/vue3";
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, watch, computed } from "vue";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Link } from "@inertiajs/vue3";
@@ -11,13 +11,19 @@ import {
     LogOut,
     Plus,
     Trash,
-    CheckCheck,
     Reply,
-    Cross,
     CircleX,
     Download,
     Video,
+    Paperclip,
+    Send,
+    Smile,
+    Users,
 } from "lucide-vue-next";
+import AvatarInitials from "@/Components/AvatarInitials.vue";
+import TypingIndicator from "@/Components/TypingIndicator.vue";
+import DateSeparator from "@/Components/DateSeparator.vue";
+import MessageStatus from "@/Components/MessageStatus.vue";
 
 import {
     Dialog,
@@ -72,7 +78,7 @@ watch(() => form.errors.file, (error) => {
 const addedEmail = ref("");
 const messages = ref([...props.messages.data.reverse()]);
 const messageContainer = ref(null);
-const onlineUsers = ref([]); //online users in this conversations
+const onlineUsers = ref([]);
 const isUserTyping = ref(false);
 const typingUserName = ref("");
 const isUserTypingTimer = ref(null);
@@ -81,6 +87,11 @@ const users = ref([...props.conversation.users]);
 
 const open = ref(false);
 
+const visibleMessages = computed(() => {
+    return messages.value.filter(msg => 
+        (msg.message && msg.message.trim() !== '') || msg.upload
+    );
+});
 
 const cursorPosition = ref(0);
 const textInput = ref(null);
@@ -96,7 +107,6 @@ const selectedEmoji = async (args) => {
     const after = form.message ? form.message.slice(cursorPosition.value) : '';
     form.message = before + emoji + after;
 
-    // Update cursor position after emoji insertion
     await nextTick();
     cursorPosition.value += emoji.length;
     input.setSelectionRange(cursorPosition.value, cursorPosition.value);
@@ -104,51 +114,48 @@ const selectedEmoji = async (args) => {
 };
 
 const replyMessageText = ref("");
-
-// preview image snippet
 const previewImage = ref(null);
 
 const loadPreviewFile = (event) => {
    const file = event.target.files[0];   
    previewImage.value = URL.createObjectURL(file);   
-}
+};
 
-// change to axios request later
 const submit = () => {
-        
-    if (form.message || form.file) {
-        form.post(route("messages.store", props.conversation.id), {
-            message: form.message,
-            replyMessageId: form.replyMessageId,
-            file : form.file,
-            onFinish: () => {
-                form.message = null;
-                replyMessageText.value = null;
-                form.replyMessageId = null;
-                form.file = null;
-            },
-        });
+    if (!form.message?.trim() && !form.file) {
+        return;
     }
+    form.post(route("messages.store", props.conversation.id), {
+        message: form.message?.trim() || null,
+        replyMessageId: form.replyMessageId,
+        file : form.file,
+        onFinish: () => {
+            form.message = null;
+            replyMessageText.value = null;
+            form.replyMessageId = null;
+            form.file = null;
+            previewImage.value = null;
+        },
+    });
 };
 
 const replyMessage = async (id, message) => {
-    textInput.value.focus(); // auto focus on text input when replying
-    
+    textInput.value.focus();
     replyMessageText.value = message ?? 'File Message';
     form.replyMessageId = id;
 };
 
 const deleteReplyMessage = () => {
     replyMessageText.value = "";
+    form.replyMessageId = null;
 };
+
 const inviteToGroup = async () => {
     if (addedEmail.value.trim() !== "") {
         try {
             const response = await axios.post(
                 `/conversations/${props.conversation.id}/add`,
-                {
-                    email: addedEmail.value,
-                }
+                { email: addedEmail.value }
             );
             addedEmail.value = "";
             location.reload();
@@ -180,7 +187,7 @@ const leaveGroup = async () => {
     }
 };
 
-const activeRoom = ref(null); // { roomName, conversationId } — set when user left without ending
+const activeRoom = ref(null);
 
 const startCall = async () => {
     const res = await axios.post(`/conversations/${props.conversation.id}/call/start`);
@@ -207,7 +214,6 @@ const rejoinCall = async () => {
         },
     }));
 };
-
 
 const addSeenByUser = async () => {
     try {
@@ -241,10 +247,39 @@ const sendTypingEvent = () => {
 };
 
 const scrollToHeight = () => {
-    messageContainer.value.scrollTo({
+    messageContainer.value?.scrollTo({
         top: messageContainer.value.scrollHeight,
         behavior: "smooth",
     });
+};
+
+const getOtherUser = computed(() => {
+    if (props.conversation.is_group) return null;
+    return users.value.find(u => u.id !== props.auth.user.id);
+});
+
+const isUserOnline = (userId) => {
+    return onlineUsers.value.some(u => u.id === userId);
+};
+
+const formatMessageTime = (date) => {
+    return moment(date).format('h:mm A');
+};
+
+const shouldShowDateSeparator = (index) => {
+    if (index === 0) return true;
+    const current = moment(messages.value[index].created_at).format('YYYY-MM-DD');
+    const previous = moment(messages.value[index - 1].created_at).format('YYYY-MM-DD');
+    return current !== previous;
+};
+
+const getMessageFileIcon = (type) => {
+    switch (type) {
+        case 'image': return 'image';
+        case 'video': return 'video';
+        case 'audio': return 'audio';
+        default: return 'file';
+    }
 };
 
 onMounted(() => {
@@ -254,8 +289,6 @@ onMounted(() => {
         .listen("ChatMessageSent", async (response) => {
             const res = await addSeenByUser();
             messages.value.push(res.data.data);
-            // console.log(response);
-
         })
         .listen("CallEnded", () => {
             activeRoom.value = null;
@@ -287,25 +320,17 @@ onMounted(() => {
     window.Echo.join(`online`)
         .here((users) => {
             onlineUsers.value = users;
-            // console.log("here");
         })
         .joining((user) => {
-            // console.log("joining");
-
             onlineUsers.value.push(user);
         })
         .leaving((user) => {
-            onlineUsers.value = onlineUsers.value.filter(
-                (u) => u.id !== user.id
-            );
-            // console.log("leaving");
+            onlineUsers.value = onlineUsers.value.filter((u) => u.id !== user.id);
         });
 });
 
 onBeforeUnmount(() => {
-    // console.log("unmount");
     window.Echo.leave(`conversation.${props.conversation.id}`, (user) => {
-        // console.log("leave");
         onlineUsers.value = onlineUsers.value.filter((u) => u.id !== user.id);
     });
 });
@@ -313,479 +338,360 @@ onBeforeUnmount(() => {
 
 <template>
     <Dashboard :conversations="conversations">
-        <div class="justify-between border-b py-4 flex flex-col md:flex-row">
-            <div class="flex items-center">
-                <Link :href="route('dashboard')">
-                    <Button variant="outline" size="icon">
-                        <ChevronLeft class="w-4 h-4" />
+    <div class="flex flex-col h-full overflow-hidden">
+        <!-- Chat Header -->
+        <header class="flex items-center justify-between px-4 py-3 border-b border-border-default bg-bg-surface">
+            <div class="flex items-center gap-3">
+                <Link :href="route('conversations.index')">
+                    <Button variant="ghost" size="icon" class="h-9 w-9 rounded-xl">
+                        <ChevronLeft class="w-5 h-5" />
                     </Button>
                 </Link>
-                <div>
-                    <div class="flex items-center bg-gray-100 rounded-xl px-4">
-                        <span
-                            class="text-lg font-semibold mx-2 bg-indigo-100 p-2 rounded"
-                            v-if="conversation.is_group && conversation.name"
-                            >{{ conversation.name?.toUpperCase() }}</span
-                        >
-                        <div v-for="user in users" :key="user.id" class="">
-                            <div class="" v-if="user.id !== auth.user.id">
-                                <div
-                                    class="text-lg font-semibold mr-2 p-2 rounded"
-                                    v-if="!conversation.is_group"
-                                >
-                                    <p>{{ user.name }}</p>
 
-                                    <small
-                                        class="font-normal text-xs"
-                                        v-if="
-                                            !onlineUsers.find(
-                                                (u) => u.id == user.id
-                                            )
-                                        "
-                                        >Last seen
-                                        {{
-                                            user.last_active_at
-                                                ? moment(
-                                                      user.last_active_at
-                                                  ).fromNow()
-                                                : "a long time ago"
-                                        }}</small
-                                    >
-                                    <p class="font-normal text-xs" v-else>
-                                        <span
-                                            :class="
-                                                onlineUsers.find(
-                                                    (u) => u.id == user.id
-                                                )
-                                                    ? 'bg-green-500'
-                                                    : 'bg-red-400'
-                                            "
-                                            class="inline-block h-2 w-2 rounded-full"
-                                        ></span>
-                                        Active now
-                                    </p>
-                                </div>
-                                <div
-                                    class="border h-10 text-md font-semibold mr-2 p-2 rounded"
-                                    v-else
-                                >
-                                    {{ user.name.split(" ")[0] }}
-                                    <span
-                                        :class="
-                                            onlineUsers.find(
-                                                (u) => u.id == user.id
-                                            )
-                                                ? 'bg-green-500'
-                                                : 'bg-red-400'
-                                        "
-                                        class="inline-block h-2 w-2 rounded-full"
-                                    ></span>
-                                </div>
-                            </div>
+                <div class="flex items-center gap-3">
+                    <AvatarInitials
+                        v-if="!conversation.is_group"
+                        :user="getOtherUser"
+                        :show-online="true"
+                        :is-online="isUserOnline(getOtherUser?.id)"
+                        size="md"
+                    />
+                    <div v-else>
+                        <div class="flex -space-x-2">
+                            <AvatarInitials
+                                v-for="(user, idx) in conversation.users.slice(0, 3)"
+                                :key="user.id"
+                                :user="user"
+                                size="sm"
+                            />
                         </div>
+                    </div>
+
+                    <div>
+                        <h2 class="font-semibold text-text-primary">
+                            {{ conversation.is_group ? (conversation.name || 'Group Chat') : (getOtherUser?.name || 'Unknown') }}
+                        </h2>
+                        <p class="text-xs text-text-muted">
+                            <template v-if="!conversation.is_group">
+                                <span v-if="isUserOnline(getOtherUser?.id)" class="flex items-center gap-1">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-status-online"></span>
+                                    Active now
+                                </span>
+                                <span v-else-if="getOtherUser?.last_active_at">
+                                    Last seen {{ moment(getOtherUser.last_active_at).fromNow() }}
+                                </span>
+                                <span v-else>Offline</span>
+                            </template>
+                            <span v-else>{{ conversation.users.length }} members</span>
+                        </p>
                     </div>
                 </div>
             </div>
-            <div class="mx-14 md:mx-4 mt-1 flex items-center gap-2">
-                <Dialog>
+
+            <div class="flex items-center gap-2">
+                <Button v-if="activeRoom && activeRoom.conversationId === conversation.id" variant="outline" class="h-9 rounded-xl text-status-online border-status-online">
+                    <Video class="w-4 h-4 mr-1.5" />
+                    Rejoin Call
+                </Button>
+                <Button v-else variant="outline" class="h-9 rounded-xl" @click="startCall">
+                    <Video class="w-4 h-4 mr-1.5" />
+                    Call
+                </Button>
+
+                <Dialog v-if="conversation.is_group">
                     <DialogTrigger as-child>
-                        <Button variant="outline">
-                            <Plus class="w-4 h-4" />Add</Button
-                        >
+                        <Button variant="outline" size="icon" class="h-9 w-9 rounded-xl">
+                            <Plus class="w-4 h-4" />
+                        </Button>
                     </DialogTrigger>
-                    <DialogContent class="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Add new member</DialogTitle>
-                            <DialogDescription>
-                                You can add someone to this group by email. New
-                                member also got to see chat history.
+                    <DialogContent class="sm:max-w-sm">
+                        <DialogHeader class="mb-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: oklch(0.96 0.04 50);">
+                                    <Users class="w-5 h-5" style="color: oklch(0.65 0.18 50);" />
+                                </div>
+                                <DialogTitle class="text-lg" style="color: oklch(0.15 0.01 60);">Add new member</DialogTitle>
+                            </div>
+                            <DialogDescription class="text-sm" style="color: oklch(0.45 0.01 60);">
+                                Invite someone to join this group by entering their email address.
                             </DialogDescription>
                         </DialogHeader>
-                        <div>
-                            <form
-                                @submit.prevent="inviteToGroup"
-                                class="w-full flex items-center space-x-2"
+                        <form @submit.prevent="inviteToGroup" class="space-y-4">
+                            <div class="space-y-2">
+                                <Label for="invite-email" class="text-sm font-medium" style="color: oklch(0.15 0.01 60);">Email address</Label>
+                                <Input 
+                                    id="invite-email" 
+                                    type="email" 
+                                    v-model="addedEmail" 
+                                    placeholder="friend@example.com"
+                                    class="h-11 rounded-xl"
+                                    style="border-color: oklch(0.91 0.005 60); background-color: oklch(0.99 0.003 60);"
+                                />
+                            </div>
+                            <Button 
+                                type="submit" 
+                                class="w-full h-11 rounded-xl text-white font-medium"
+                                style="background-color: oklch(0.65 0.18 50);"
+                                :disabled="!addedEmail"
                             >
-                                <div class="grid flex-1 gap-2">
-                                    <Label for="email" class="sr-only">
-                                        Email
-                                    </Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        v-model="addedEmail"
-                                    />
-                                </div>
-                                <Button type="submit" size="lg" class="px-3">
-                                    <span class="sr-only">Copy</span>
-                                    <ChevronRight class="w-4 h-4" />
-                                </Button>
-                            </form>
-                        </div>
+                                Send Invitation
+                            </Button>
+                        </form>
                     </DialogContent>
                 </Dialog>
-                <Button v-if="activeRoom && activeRoom.conversationId === conversation.id" variant="outline" class="text-green-600 border-green-400" @click="rejoinCall">
-                    <Video class="w-4 h-4" />Rejoin
-                </Button>
-                <Button v-else variant="outline" @click="startCall">
-                    <Video class="w-4 h-4" />Call
-                </Button>
-                <Button variant="outline" class="" @click="leaveGroup">
-                    <LogOut class="w-4 h-4" />Leave
+
+                <Button v-if="conversation.is_group" variant="outline" class="h-9 rounded-xl text-destructive border-destructive/50 hover:bg-destructive/10" @click="leaveGroup">
+                    <LogOut class="w-4 h-4 mr-1.5" />
+                    Leave
                 </Button>
             </div>
-        </div>
+        </header>
 
+        <!-- Messages Area -->
         <div
-            class="flex flex-col h-full overflow-x-auto mb-4 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-gray-300 dark:[&::-webkit-scrollbar-thumb]:bg-gray-400"
             ref="messageContainer"
+            class="flex-1 overflow-y-auto py-4 px-4 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border-default [&::-webkit-scrollbar-thumb]:rounded-full"
         >
-            <div class="flex flex-col h-full" v-if="messages.length">
-                <template v-for="message in messages" :key="message.id">
+            <div v-if="visibleMessages.length" class="space-y-4">
+                <template v-for="(message, index) in visibleMessages" :key="message.id">
+                    <!-- Date Separator -->
+                    <DateSeparator
+                        v-if="shouldShowDateSeparator(index)"
+                        :date="message.created_at"
+                    />
 
-                <!-- System message (e.g. Video call ended) -->
-                <div
-                    v-if="message.type === 'system'"
-                    class="flex justify-center my-2"
-                >
-                    <div class="flex items-center gap-2 bg-gray-100 text-gray-500 text-xs px-4 py-1.5 rounded-full">
-                        <Video class="w-3 h-3" />
-                        <span>{{ message.message }}</span>
-                        <span>· {{ moment(message.created_at).format('hh:mm a') }}</span>
+                    <!-- System Message -->
+                    <div v-if="message.type === 'system'" class="flex justify-center">
+                        <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-surface-raised border border-border-subtle">
+                            <Video class="w-3 h-3 text-text-muted" />
+                            <span class="text-xs text-text-muted">{{ message.message }}</span>
+                            <span class="text-[10px] text-text-muted">·</span>
+                            <span class="text-[10px] text-text-muted">{{ formatMessageTime(message.created_at) }}</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Regular chat message -->
-                <div
-                    v-else
-                    class="grid grid-cols-12 gap-y-2"
-                >
+                    <!-- Chat Message -->
                     <div
-                        class="col-start-6 col-end-13 p-3 rounded-lg"
-                        v-if="auth.user.id === message.user_id"
+                        v-else
+                        class="flex animate-slide-up"
+                        :class="auth.user.id === message.user_id ? 'justify-end' : 'justify-start'"
                     >
                         <div
-                            class="flex items-center justify-start flex-row-reverse"
+                            class="group flex items-end gap-2 max-w-[70%]"
+                            :class="auth.user.id === message.user_id ? 'flex-row-reverse' : 'flex-row'"
                         >
+                            <!-- Avatar (only show for received messages and first in a sequence) -->
+                            <AvatarInitials
+                                v-if="auth.user.id !== message.user_id"
+                                :user="message.user"
+                                :show-online="true"
+                                :is-online="isUserOnline(message.user.id)"
+                                size="sm"
+                                class="flex-shrink-0"
+                            />
+                            <div v-else class="w-6 flex-shrink-0"></div>
+
+                            <!-- Message Bubble -->
                             <div class="relative">
-                                <img
-                                    v-if="message.user.image"
-                                    :src="message.user.image"
-                                    alt="Avatar"
-                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                />
-                                <div
-                                    v-else
-                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
+                                <!-- Reply Preview -->
+                                <a
+                                    v-if="message.reply"
+                                    :href="'#message-' + message.chat_message_id"
+                                    class="flex items-center gap-2 mb-2 p-2 rounded-lg bg-black/5 hover:bg-black/10 transition-colors"
                                 >
-                                    {{ message.user.name[0] }}
-                                </div>
-                                <span
-                                    :class="
-                                        onlineUsers.find(
-                                            (u) => u.id == message.user.id
-                                        )
-                                            ? 'bg-green-500'
-                                            : 'bg-red-400'
-                                    "
-                                    class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
-                                ></span>
-                            </div>
-                            <div class="mr-3 group flex items-center gap-2">
-                                <div>
-                                    <Reply
-                                        class="w-4 h-4 cursor-pointer hidden group-hover:block"
-                                        @click="
-                                            replyMessage(
-                                                message.id,
-                                                message.message
-                                            )
-                                        "
+                                    <Reply class="w-3 h-3 text-text-muted flex-shrink-0" />
+                                    <span class="text-xs font-medium text-text-secondary truncate">
+                                        {{ message.reply?.message || 'File Message' }}
+                                    </span>
+                                </a>
+
+                                <!-- Media -->
+                                <div v-if="message.upload" class="mb-2">
+                                    <img
+                                        v-if="message.upload.type === 'image'"
+                                        :src="'/uploads/'+message.upload.id"
+                                        alt=""
+                                        class="rounded-xl max-w-[280px] max-h-[280px] object-cover"
                                     />
-                                </div>
-                                <div>
-                                    <Trash
-                                        class="w-4 h-4 cursor-pointer hidden group-hover:block"
-                                        @click="deleteMessage(message.id)"
-                                    />
+                                    <video
+                                        v-else-if="message.upload.type === 'video'"
+                                        :src="'/uploads/'+message.upload.id"
+                                        class="rounded-xl max-w-[280px] max-h-[280px] object-cover"
+                                        controls
+                                    ></video>
+                                    <audio
+                                        v-else-if="message.upload.type === 'audio'"
+                                        :src="'/uploads/'+message.upload.id"
+                                        class="w-[280px] rounded-xl"
+                                        controls
+                                    ></audio>
+                                    <a
+                                        v-else
+                                        :href="'/uploads/'+message.upload.id"
+                                        target="_blank"
+                                        class="flex items-center gap-2 p-3 rounded-xl bg-black/5 hover:bg-black/10 transition-colors"
+                                    >
+                                        <Download class="w-4 h-4 text-text-muted" />
+                                        <span class="text-sm text-text-secondary truncate">
+                                            {{ message.upload.file_original_name }}
+                                        </span>
+                                    </a>
                                 </div>
 
+                                <!-- Text Content -->
                                 <div
                                     :id="'message-' + message.id"
-                                    class="relative text-sm bg-indigo-100 py-2 px-4 shadow rounded-xl flex gap-2 items-center justify-between"
-                                >
-                                    <div>
-                                        <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
-                                        <small class="">
-                                            {{ message.reply?.message ?? 'File Messsage'}}
-                                        </small>
-                                        <Reply class="w-4 h-4" />
-                                        </a>
-                                        <div v-if="message.upload" class="mt-3">
-                                            <div v-if="message.upload.type === 'image'">
-                                                <img :src="'/uploads/'+message.upload.id" alt="" width="300px" height="300px">
-                                            </div>
-                                            <div v-else-if="message.upload.type === 'video'">
-                                                <video :src="'/uploads/'+message.upload.id"  width="300px" height="300px" controls></video>
-                                            </div>
-                                            <div v-else-if="message.upload.type === 'audio'">
-                                                <audio :src="'/uploads/'+message.upload.id"  width="300px" height="300px" controls></audio>
-                                            </div>
-                                            <div v-else>
-                                                <a :href="'/uploads/'+message.upload.id" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
-                                                    <Download
-                                                        class="w-4 h-4 cursor-pointer"
-                                                    />
-                                                    {{ message.upload.file_original_name }}
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <p>
-                                            {{ message.message }}
-                                        </p>
-                                        <p class="text-end">
-                                            <small>{{
-                                                moment(
-                                                    message.created_at
-                                                ).format("hh:mm a")
-                                            }}</small>
-                                            <small class="px-2">
-                                                <CheckCheck
-                                                    class="w-3 h-3 inline-block"
-                                                    :class="[
-                                                        message.seen_by
-                                                            ? 'text-green-500'
-                                                            : '',
-                                                    ]"
-                                                />
-                                            </small>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-start-1 col-end-8 p-3 rounded-lg" v-else>
-                        <div class="flex flex-row items-center">
-                            <div class="relative">
-                                <img
-                                    v-if="message.user.image"
-                                    :src="message.user.image"
-                                    alt="Avatar"
-                                    class="h-8 w-8 rounded-full border-3 border-indigo-200"
-                                />
-                                <div
-                                    v-else
-                                    class="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                                >
-                                    {{ message.user.name[0] }}
-                                </div>
-                                <span
-                                    :class="
-                                        onlineUsers.find(
-                                            (u) => u.id == message.user.id
-                                        )
-                                            ? 'bg-green-500'
-                                            : 'bg-red-400'
+                                    class="relative rounded-2xl px-4 py-2.5 shadow-sm"
+                                    :class="auth.user.id === message.user_id
+                                        ? 'bg-bubble-sent text-bubble-sent-text rounded-br-md'
+                                        : 'bg-bubble-received text-bubble-received-text border border-border-default rounded-bl-md'
                                     "
-                                    class="inline-block h-3 w-3 rounded-full ml-2 absolute top-5 border-2 border-white left-3"
-                                ></span>
-                            </div>
-                            <div class="flex justify-between items-center group gap-2">
-                                <div :id="'message-' + message.id"
-                                    class="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl"
                                 >
-                                <a :href="'#message-' + message.chat_message_id" v-if="message.reply" class="flex gap-3 items-center font-semibold border-b border-indigo-200 mb-3 p-1">
-                                    <Reply class="w-4 h-4" />
-                                        <small class="">
-                                            {{ message.reply?.message ?? 'File Messsage' }}
-                                        </small>
-                                        </a>
+                                    <!-- Sender name for group chats -->
+                                    <p
+                                        v-if="conversation.is_group && auth.user.id !== message.user_id"
+                                        class="text-xs font-semibold mb-1 text-accent-primary"
+                                    >
+                                        {{ message.user.name }}
+                                    </p>
 
-                                        <div v-if="message.upload" class="mt-3">
-
-                                            <div v-if="message.upload.type === 'image'">
-                                                <img :src="'/uploads/'+message.upload.id" alt="" width="300px" height="300px">
-                                            </div>
-                                            <div v-else-if="message.upload.type === 'video'">
-                                                <video width="320" height="240" controls>
-                                                    <source :src="'/uploads/'+message.upload.id">
-                                                </video>                                            
-                                            </div>
-                                            <div v-else-if="message.upload.type === 'audio'">
-                                                <audio controls>
-                                                    <source :src="'/uploads/'+message.upload.id" >
-                                                </audio>
-                                            </div>
-                                            <div v-else>
-                                                <a :href="'/uploads/'+message.upload.id" target="_blank" class="flex justify-center items-center gap-2 underline underline-offset-2">
-                                                    <Download
-                                                        class="w-4 h-4 cursor-pointer"
-                                                    />
-                                                    {{ message.upload.file_original_name }}
-                                                </a>
-                                            </div>
-                                        </div>
-                                    <p>
+                                    <p v-if="message.message?.trim()" class="text-sm leading-relaxed whitespace-pre-wrap break-words">
                                         {{ message.message }}
                                     </p>
-                                    <p class="text-end">
-                                        <small>{{
-                                            moment(message.created_at).format(
-                                                "hh:mm a"
-                                            )
-                                        }}</small>
-                                    </p>
-                                </div>
-                                <div class="mr-3 flex items-center gap-2">
-                                    <div>
-                                        <Reply
-                                            class="w-4 h-4 cursor-pointer hidden group-hover:block"
-                                            @click="
-                                                replyMessage(
-                                                    message.id,
-                                                    message.message
-                                                )
-                                            "
+
+                                    <div
+                                        class="flex items-center justify-end gap-1 mt-1"
+                                        :class="auth.user.id === message.user_id ? 'flex-row-reverse' : ''"
+                                    >
+                                        <span
+                                            class="text-[10px]"
+                                            :class="auth.user.id === message.user_id ? 'text-white/70' : 'text-text-muted'"
+                                        >
+                                            {{ formatMessageTime(message.created_at) }}
+                                        </span>
+                                        <MessageStatus
+                                            v-if="auth.user.id === message.user_id"
+                                            :is-read="message.seen_by"
+                                            :is-sent="true"
                                         />
                                     </div>
-                                    <div>
-                                        <!-- <Trash
-                                            class="w-4 h-4 cursor-pointer hidden group-hover:block"
-                                            @click="deleteMessage(message.id)"
-                                        /> -->
-                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div
+                                    class="absolute -top-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1"
+                                    :class="auth.user.id === message.user_id ? '-left-2' : '-right-2'"
+                                >
+                                    <button
+                                        @click="replyMessage(message.id, message.message)"
+                                        class="flex items-center justify-center h-6 w-6 rounded-full bg-bg-surface border border-border-default shadow-sm hover:bg-bg-surface-raised transition-colors"
+                                        title="Reply"
+                                    >
+                                        <Reply class="w-3 h-3 text-text-secondary" />
+                                    </button>
+                                    <button
+                                        v-if="auth.user.id === message.user_id"
+                                        @click="deleteMessage(message.id)"
+                                        class="flex items-center justify-center h-6 w-6 rounded-full bg-bg-surface border border-border-default shadow-sm hover:bg-destructive/10 transition-colors"
+                                        title="Delete"
+                                    >
+                                        <Trash class="w-3 h-3 text-destructive" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
                 </template>
             </div>
-            <div
-                class="flex flex-col h-full justify-center items-center"
-                v-else
-            >
-                <p class="text-2xl font-bold">No messages</p>
-            </div>
-        </div>
-        <small v-if="isUserTyping"  class="text-gray-600 mb-2 ml-3">
-            {{ typingUserName }} is typing...
-        </small>
-        <div
-            class="block ml-3 text-sm bg-indigo-200 py-2 px-4 mb-1 shadow rounded-xl"
-            v-if="replyMessageText"
-        >
-            <div class="flex justify-between items-center font-bold">
-                <div class="flex items-center">
-                    <Reply class="w-4 h-4 mr-2" />
-                    <p>Replying to</p>
-                </div>
-                <CircleX
-                    class="w-4 h-4 cursor-pointer"
-                    @click="deleteReplyMessage"
-                />
-            </div>
-            <small>
-                {{ replyMessageText }}
-            </small>
-        </div>
-        <div
-            class="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4"
-        >
-        
-            <form
-                @submit.prevent="submit"
-                class="flex justify-center items-center flex-grow"
-            >
-            <div class="">
-                <label
-                    class="flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                <input type="file" accept="" class="hidden" @input="form.file = $event.target.files[0]" @change="submit();">
-                    <svg
-                        class="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                        ></path>
+
+            <!-- Empty State -->
+            <div v-else class="flex flex-col items-center justify-center h-full text-center">
+                <div class="w-20 h-20 rounded-full bg-bg-surface-raised flex items-center justify-center mb-4">
+                    <svg class="w-10 h-10 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                </label>
+                </div>
+                <p class="text-lg font-semibold text-text-secondary">No messages yet</p>
+                <p class="text-sm text-text-muted mt-1">Say hi to start the conversation!</p>
             </div>
-                <div class="ml-4 flex-grow">
-                    <div class="relative w-full py-2">
-                        <input
-                            type="text"
-                            class="flex w-full border rounded-xl focus:outline-none focus:border-indigo-300 pl-4 h-10"
-                            v-model="form.message"
-                            ref="textInput"
-                            @keydown="sendTypingEvent"
-                            @click="updateCursorPosition"
-                            @keyup="updateCursorPosition"
-                        />
+        </div>
 
-                        <button
-                            type="button"
-                            @click="open = !open"
-                            class="absolute flex items-center justify-center h-full w-12 right-0 top-0 text-gray-400 hover:text-gray-600"
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                ></path>
-                            </svg>
-                        </button>
-                    </div>
+        <!-- Typing Indicator -->
+        <TypingIndicator
+            v-if="isUserTyping"
+            :user-name="typingUserName"
+        />
 
-                </div>
-                <div class="ml-4 relative">
-                    <VueChatEmojiComponent
-                        :open="open"
-                        v-if="open"
-                        width="280px"
-                        @handle="selectedEmoji"
-                        class="grid place-items-end"
-                    />
+        <!-- Reply Preview -->
+        <div
+            v-if="replyMessageText"
+            class="flex items-center justify-between px-4 py-2 bg-accent-primary-subtle border-t border-border-default"
+        >
+            <div class="flex items-center gap-2">
+                <Reply class="w-4 h-4 text-accent-primary" />
+                <span class="text-sm text-text-secondary">Replying to:</span>
+                <span class="text-sm text-text-primary truncate max-w-[200px]">{{ replyMessageText }}</span>
+            </div>
+            <button @click="deleteReplyMessage" class="p-1 hover:bg-black/5 rounded-lg transition-colors">
+                <CircleX class="w-4 h-4 text-text-muted" />
+            </button>
+        </div>
+
+        <!-- Message Input -->
+        <div class="p-4 border-t border-border-default bg-bg-surface">
+            <form @submit.prevent="submit" class="flex items-end gap-2">
+                <!-- Emoji Button -->
+                <div class="relative">
                     <button
-                        class="flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 rounded-xl text-white px-4 py-2 flex-shrink-0"
+                        type="button"
+                        @click="open = !open"
+                        class="flex items-center justify-center h-10 w-10 rounded-xl hover:bg-bg-surface-raised transition-colors"
                     >
-                        <!-- <span>Send</span> -->
-                        <span class="">
-                            <svg
-                                class="w-4 h-4 transform rotate-45 -mt-px"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                                ></path>
-                            </svg>
-                        </span>
+                        <Smile class="w-5 h-5 text-text-muted" />
                     </button>
+                    
+                    <!-- Emoji Picker -->
+                    <div v-if="open" class="absolute left-0 bottom-full mb-2 z-50">
+                        <VueChatEmojiComponent
+                            :open="open"
+                            @handle="selectedEmoji"
+                            width="300px"
+                            class="shadow-xl rounded-xl border bg-white"
+                        />
+                    </div>
                 </div>
+
+                <!-- Attachment Button -->
+                <label class="flex items-center justify-center h-10 w-10 rounded-xl cursor-pointer hover:bg-bg-surface-raised transition-colors">
+                    <input type="file" class="hidden" @input="form.file = $event.target.files[0]" @change="submit" />
+                    <Paperclip class="w-5 h-5 text-text-muted" />
+                </label>
+
+                <!-- Text Input -->
+                <div class="flex-1 relative">
+                    <input
+                        type="text"
+                        class="w-full h-11 px-4 rounded-xl bg-bg-input border border-border-default text-text-primary placeholder:text-text-muted focus:outline-none focus:border-input-border-focus transition-colors"
+                        v-model="form.message"
+                        ref="textInput"
+                        placeholder="Type a message..."
+                        @keydown="sendTypingEvent"
+                        @click="updateCursorPosition"
+                        @keyup="updateCursorPosition"
+                    />
+                </div>
+
+                <!-- Send Button -->
+                <Button
+                    type="submit"
+                    size="icon"
+                    class="h-10 w-10 rounded-xl bg-button-send hover:bg-button-send-hover transition-colors"
+                    :disabled="!form.message && !form.file"
+                >
+                    <Send class="w-4 h-4" />
+                </Button>
             </form>
         </div>
-    </Dashboard>
+    </div>
+</Dashboard>
 </template>

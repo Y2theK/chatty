@@ -118,19 +118,21 @@ onBeforeUnmount(() => {
         @call-ended="onCallEnded"
     />
 
-    <AuthenticatedLayout>
-        <div class="flex h-screen antialiased text-slate-800">
-            <div class="flex flex-row h-full w-full overflow-x-hidden justify-center">
-                <Sidebar :conversations="conversations" :allOnlineUsers="allOnlineUsers" :class="[route().current('conversations.index') ? '' : 'hidden sm:flex']"></Sidebar>
-                <div class=" flex-col flex-auto h-full p-4 sm:p-6" :class="[route().current('conversations.index') ? 'hidden sm:flex' : '']">
-                    <div
-                        class="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-2"
-                    >
-                        <slot></slot>
-                    </div>
-                </div>
-            </div>
+    <div class="flex h-screen overflow-hidden" style="background-color: oklch(0.99 0.005 60);">
+        <!-- Sidebar - Always visible -->
+        <div class="flex-shrink-0 w-80">
+            <Sidebar
+                :conversations="conversations"
+                :allOnlineUsers="allOnlineUsers"
+            />
         </div>
-        <Toaster />
-    </AuthenticatedLayout>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col min-w-0">
+            <div class="flex-1 p-4 overflow-auto">
+                <slot></slot>
+            </div>
+        </main>
+    </div>
+    <Toaster />
 </template>

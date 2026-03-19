@@ -15,20 +15,21 @@ Chatty is small a real time messaging app providing seemless experience of chatt
 - [x] Responsive
 - [x] Message delete, forward and reply
 - [X] Support Image, Video, and links in conversation
-
+- [X] Video Call & Audio Call
 
 ### Tech Stacks:
 `Laravel 11` `sqlite` `vue 3` `laravel-reverb` `tailwindcss` `shadcn-vue` `inertia` `axios` `laravel-breeeze` `laravel-echo`
 
 ### Coming soon
-- [ ] Video Call & Audio Call
+- [ ] My Day Sharing
+- [ ] Chat Info details
 
 ### Screenshots
 
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/4.png" width=50% height=50% alt= "Home Page">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/5.png" width=50% height=50% alt= "Chat Page">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/6.png" width=50% height=50% alt= "Search User">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/3.png" width=50% height=50% alt= "Add User">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/4.png" width=50% height=50% alt= "Home">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/5.png" width=50% height=50% alt= "Chat">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/6.png" width=50% height=50% alt= "Call">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/3.png" width=50% height=50% alt= "Meet">
 
 
 
