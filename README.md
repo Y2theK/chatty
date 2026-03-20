@@ -22,14 +22,14 @@ Chatty is small a real time messaging app providing seemless experience of chatt
 
 ### Coming soon
 - [ ] My Day Sharing
-- [ ] Chat Info details
+- [ ] Audio Message
 
 ### Screenshots
 
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/4.png" width=50% height=50% alt= "Home">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/5.png" width=50% height=50% alt= "Chat">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/6.png" width=50% height=50% alt= "Call">
-<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/3.png" width=50% height=50% alt= "Meet">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/home.png" width=50% height=50% alt= "Home">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/chat.png" width=50% height=50% alt= "Chat">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/call.png" width=50% height=50% alt= "Call">
+<img src="https://github.com/Y2theK/chatty/blob/dev/public/images/meet.png" width=50% height=50% alt= "Meet">
 
 
 
