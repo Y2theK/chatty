@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CallController;
 use App\Http\Controllers\ChatMessageController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\ProfileController;
@@ -47,6 +48,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('users', [UserController::class, 'index'])->name('users.index');
 
     Route::get('/uploads/{upload}', [UploadController::class, 'serve'])->name('uploads.serve');
+
+    Route::post('/conversations/{conversation}/call/start', [CallController::class, 'start'])->name('call.start');
+    Route::post('/conversations/{conversation}/call/join', [CallController::class, 'join'])->name('call.join');
+    Route::post('/conversations/{conversation}/call/end', [CallController::class, 'end'])->name('call.end');
 
 });
 

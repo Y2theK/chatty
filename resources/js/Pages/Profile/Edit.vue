@@ -1,9 +1,11 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import DeleteUserForm from './Partials/DeleteUserForm.vue';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm.vue';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-vue-next';
+import Dashboard from '@/Pages/Dashboard.vue';
 
 defineProps({
     mustVerifyEmail: {
@@ -18,39 +20,45 @@ defineProps({
 <template>
     <Head title="Profile" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Profile
-            </h2>
-        </template>
+    <Dashboard :conversations="[]">
+        <div class="p-6 max-w-2xl mx-auto">
+            <Link :href="route('dashboard')">
+                <Button variant="ghost" size="icon" class="mb-4">
+                    <ChevronLeft class="w-5 h-5" />
+                </Button>
+            </Link>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800"
-                >
+            <div class="space-y-6 pb-6">
+                <!-- Profile Information Card -->
+                <div class="rounded-xl border p-6 bg-white">
+                    <h2 class="text-lg font-semibold mb-1 text-gray-900">Profile Information</h2>
+                    <p class="text-sm mb-6 text-gray-600">
+                        Update your account's profile information and email address.
+                    </p>
                     <UpdateProfileInformationForm
                         :must-verify-email="mustVerifyEmail"
                         :status="status"
-                        class="max-w-xl"
                     />
                 </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800"
-                >
-                    <UpdatePasswordForm class="max-w-xl" />
+                <!-- Update Password Card -->
+                <div class="rounded-xl border p-6 bg-white">
+                    <h2 class="text-lg font-semibold mb-1 text-gray-900">Update Password</h2>
+                    <p class="text-sm mb-6 text-gray-600">
+                        Ensure your account is using a long, random password to stay secure.
+                    </p>
+                    <UpdatePasswordForm />
                 </div>
 
-                <div
-                    class="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800"
-                >
-                    <DeleteUserForm class="max-w-xl" />
+                <!-- Delete Account Card -->
+                <div class="rounded-xl border p-6 bg-white">
+                    <h2 class="text-lg font-semibold mb-1 text-red-600">Delete Account</h2>
+                    <p class="text-sm mb-6 text-gray-600">
+                        Once your account is deleted, all of its resources and data will be permanently deleted.
+                    </p>
+                    <DeleteUserForm />
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </Dashboard>
 </template>

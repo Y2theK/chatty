@@ -1,257 +1,350 @@
 <script setup>
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { MessagesSquare, Rocket, Unplug } from 'lucide-vue-next';
+import { MessageCircle, Zap, Users, Image, Shield, Check, Heart, Clock, Phone, MessageSquare, Bell, Lock, Smile, FlashlightIcon, LightbulbIcon } from 'lucide-vue-next';
+
 defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
+    canLogin: Boolean,
+    canRegister: Boolean,
 });
 
 const year = new Date().getFullYear();
+const appName = import.meta.env.VITE_APP_NAME || 'Chatty';
 
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
-}
+const features = [
+    { icon: MessageSquare, title: 'Private & Group Chats', desc: 'Talk one-on-one with friends or create groups for everyone.' },
+    { icon: LightbulbIcon, title: 'Instant Messaging', desc: 'Messages arrive immediately with read receipts.' },
+    { icon: Image, title: 'Share Photos', desc: 'Send photos and files easily in your chats.' },
+];
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const stats = [
+    { value: '10K+', label: 'Active Users' },
+    { value: '1M+', label: 'Messages Sent' },
+    { value: '50+', label: 'Countries' },
+    { value: '99.9%', label: 'Uptime' },
+];
 
+const steps = [
+    { num: '1', title: 'Create your account', desc: 'Sign up with just your email and a password. Takes less than a minute.' },
+    { num: '2', title: 'Find your friends', desc: 'Search for contacts or invite new people to join you on Chatty.' },
+    { num: '3', title: 'Start chatting', desc: 'Send your first message and keep the conversation going.' },
+];
+
+const testimonials = [
+    { text: "I use Chatty every day to stay in touch with my family overseas. It's so simple and works perfectly.", author: 'Maria G.', role: 'Remote Worker' },
+    { text: "Finally a chat app that doesn't try to do everything. Just messaging, done right. So good!", author: 'Tom R.', role: 'University Student' },
+    { text: "My parents struggled with complicated apps. Chatty was easy enough for them to use right away.", author: 'Sarah K.', role: 'Teacher' },
+];
+
+const whyChatty = [
+    'No ads, ever',
+    'No data selling',
+    'Simple and fast',
+    'Works on all devices',
+    'Free forever',
+    'Your data stays private',
+];
 </script>
 
 <template>
     <Head title="Welcome" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-        <img
-            id="background"
-            class="absolute -left-20 top-0 max-w-[877px]"
-            src="/images/background.svg"
-        />
-        <div
-            class="relative flex min-h-screen flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white"
-        >
-            <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-                <header
-                    class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
-                >
-                    <div class="flex lg:col-start-2 lg:justify-center items-center">
-                       <application-logo></application-logo>
-                       <p class="font-bold text-2xl text-indigo-800 mr-4">{{ appName }}</p>
+    
+    <div class="min-h-screen" style="background-color: oklch(0.99 0.005 60);">
+        <!-- Navigation -->
+        <nav class="px-6 py-5">
+            <div class="max-w-5xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-xl h-10 w-10" style="background-color: oklch(0.65 0.18 50);">
+                        <MessageCircle class="w-5 h-5 text-white" />
                     </div>
-                    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
+                    <span class="font-bold text-xl" style="color: oklch(0.15 0.01 60);">{{ appName }}</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <template v-if="$page.props.auth.user">
+                        <Link :href="route('conversations.index')" class="px-5 py-2 rounded-xl font-medium text-sm text-white" style="background-color: oklch(0.65 0.18 50);">
+                            Go to App
                         </Link>
+                    </template>
+                    <template v-else>
+                        <Link v-if="canLogin" :href="route('login')" class="px-4 py-2 rounded-lg font-medium text-sm" style="color: oklch(0.45 0.01 60);">
+                            Sign in
+                        </Link>
+                        <Link v-if="canRegister" :href="route('register')" class="px-5 py-2 rounded-xl font-medium text-sm text-white" style="background-color: oklch(0.65 0.18 50);">
+                            Get Started
+                        </Link>
+                    </template>
+                </div>
+            </div>
+        </nav>
 
-                        <template v-else>
-                            <Link
-                                :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Log in
-                            </Link>
+        <!-- Hero Section -->
+        <section class="px-6 py-16">
+            <div class="max-w-5xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style="background-color: oklch(0.96 0.04 50);">
+                            <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: oklch(0.65 0.18 50);"></span>
+                            <span class="text-xs font-medium" style="color: oklch(0.65 0.18 50);">Messaging made simple</span>
+                        </div>
+                        <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight" style="color: oklch(0.15 0.01 60);">
+                            Stay close to the<br />
+                            <span style="color: oklch(0.65 0.18 50);">people who matter</span>
+                        </h1>
+                        <p class="text-lg mb-8" style="color: oklch(0.45 0.01 60);">
+                            Simple, honest messaging for friends and family. No clutter, no complications. Just conversations.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <template v-if="$page.props.auth.user">
+                                <Link :href="route('conversations.index')" class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-white" style="background-color: oklch(0.65 0.18 50);">
+                                    Go to Messages
+                                </Link>
+                            </template>
+                            <template v-else>
+                                <Link v-if="canRegister" :href="route('register')" class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-semibold text-white" style="background-color: oklch(0.65 0.18 50);">
+                                    Start Chatting Free
+                                </Link>
+                                <Link v-if="canLogin" :href="route('login')" class="inline-flex items-center justify-center px-6 py-3 rounded-xl font-medium border" style="color: oklch(0.15 0.01 60); border-color: oklch(0.91 0.005 60);">
+                                    I Have an Account
+                                </Link>
+                            </template>
+                        </div>
+                    </div>
 
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </template>
-                    </nav>
-                </header>
+                    <!-- Chat Preview -->
+                    <div class="relative">
+                        <!-- Floating Emojis -->
+                        <div class="absolute -top-4 -left-4 text-4xl animate-bounce" style="animation-delay: 0s;">👋</div>
+                        <div class="absolute -top-2 -right-4 text-3xl animate-bounce" style="animation-delay: 0.3s;">❤️</div>
+                        <div class="absolute top-1/2 -left-6 text-3xl animate-bounce" style="animation-delay: 0.6s;">😊</div>
+                        <div class="absolute -bottom-4 -right-4 text-4xl animate-bounce" style="animation-delay: 0.9s;">🎉</div>
+                        <div class="absolute bottom-0 -left-4 text-2xl animate-bounce" style="animation-delay: 1.2s;">✨</div>
 
-                <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a
-                            :href="route('dashboard')"
-                            id="docs-card"
-                            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                id="screenshot-container"
-                                class="relative flex w-full flex-1 items-stretch"
-                            >
-                                <img
-                                    src="/images/5.png"
-                                    alt="Laravel documentation screenshot"
-                                    class="aspect-video h-full w-full border-2 border-indigo-300 flex-1 rounded-[10px] object-fill object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                    @error="handleImageError"
-                                />
-                                <img
-                                    src="/images/5.png"
-                                    alt="Laravel documentation screenshot"
-                                    class="hidden aspect-video h-full w-full border-1 border-red-100  flex-1 rounded-[10px] object-cover object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
-                                />
-                                <div
-                                    class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                ></div>
+                        <div class="rounded-2xl border shadow-2xl overflow-hidden" style="background-color: oklch(1 0 0); border-color: oklch(0.91 0.005 60);">
+                            <!-- Chat Header -->
+                            <div class="px-4 py-3 border-b flex items-center gap-3" style="border-color: oklch(0.93 0.005 60);">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background-color: oklch(0.65 0.18 50);">A</div>
+                                <div>
+                                    <p class="font-semibold text-sm" style="color: oklch(0.15 0.01 60);">Alex & Sarah</p>
+                                    <p class="text-xs" style="color: oklch(0.55 0.008 60);">Active now</p>
+                                </div>
                             </div>
-
-                            <div
-                                class="relative flex items-center gap-6 lg:items-end"
-                            >
-                                <div
-                                    id="docs-card-content"
-                                    class="flex items-start gap-6 lg:flex-col"
-                                >
-                                    <div
-                                        class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                                    >
-                                        <application-logo></application-logo>
-                                    </div>
-
-                                    <div class="pt-3 sm:pt-5 lg:pt-0">
-                                        <h2
-                                            class="text-xl font-semibold text-black dark:text-white"
-                                        >
-                                            {{ appName }}
-                                        </h2>
-
-                                        <p class="mt-4 text-sm/relaxed">
-                                            {{ appName }} is a real time messaging app providing seemless experience of chatting between friends and families. It includes features like messaging in private chat/ group chat, creating conversation, inviting new user to group, leave conversation, online/ offline user status, current active users in groups and even whisper typing event.
-                                        </p>
+                            <!-- Chat Messages -->
+                            <div class="p-4 space-y-3" style="min-height: 280px; background-color: oklch(0.99 0.005 60);">
+                                <!-- Message 1 -->
+                                <div class="flex justify-end">
+                                    <div class="max-w-[70%] px-4 py-2 rounded-2xl rounded-br-md text-sm text-white" style="background-color: oklch(0.65 0.18 50);">
+                                        Hey! Are you coming to dinner tonight? 🍕
                                     </div>
                                 </div>
-
-                                <svg
-                                    class="size-6 shrink-0 stroke-[#FF2D20]"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                    />
-                                </svg>
-                            </div>
-                        </a>
-
-                        <a
-                        :href="route('dashboard')"
-                    class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <MessagesSquare />
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Advanced Chat Management
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    {{ appName }} provides secure authentication for users, along with options for both private and group chats. Users can create and join conversations, invite others, or leave conversations, making it easy to manage interactions on their own terms.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
-                            </svg>
-                        </a>
-
-                        <a
-                        :href="route('dashboard')"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <Rocket/>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    User Status and Activity Tracking
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    {{ appName }} displays online and offline statuses, last-seen timestamps, and a list of currently active users in groups. This keeps users informed of their contacts’ availability and engagement in real time.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
-                            </svg>
-                        </a>
-
-                        <div
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                               <Unplug/>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Enhanced Message Controls
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    {{ appName }} includes tools for message management, allowing users to delete, forward, and reply to messages, with a “whisper typing” indicator for a more responsive chat experience. Profile management and search functions make it easy to find and interact with other users.
-                                </p>
+                                <!-- Message 2 -->
+                                <div class="flex justify-start">
+                                    <div class="max-w-[70%] px-4 py-2 rounded-2xl rounded-bl-md text-sm" style="background-color: oklch(0.96 0.04 50); color: oklch(0.15 0.01 60);">
+                                        Yes! Can't wait! Should I bring wine? 🍷
+                                    </div>
+                                </div>
+                                <!-- Message 3 -->
+                                <div class="flex justify-end">
+                                    <div class="max-w-[70%] px-4 py-2 rounded-2xl rounded-br-md text-sm text-white" style="background-color: oklch(0.65 0.18 50);">
+                                        That would be perfect! See you at 7 👋
+                                    </div>
+                                </div>
+                                <!-- Message 4 -->
+                                <div class="flex justify-start">
+                                    <div class="max-w-[70%] px-4 py-2 rounded-2xl rounded-bl-md text-sm" style="background-color: oklch(0.96 0.04 50); color: oklch(0.15 0.01 60);">
+                                        See you there! 💕
+                                    </div>
+                                </div>
+                                <!-- Typing Indicator -->
+                                <div class="flex justify-start">
+                                    <div class="px-4 py-3 rounded-2xl rounded-bl-md" style="background-color: oklch(0.96 0.04 50);">
+                                        <div class="flex gap-1">
+                                            <span class="w-2 h-2 rounded-full animate-bounce" style="background-color: oklch(0.65 0.18 50); animation-delay: 0s;"></span>
+                                            <span class="w-2 h-2 rounded-full animate-bounce" style="background-color: oklch(0.65 0.18 50); animation-delay: 0.15s;"></span>
+                                            <span class="w-2 h-2 rounded-full animate-bounce" style="background-color: oklch(0.65 0.18 50); animation-delay: 0.3s;"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </main>
-
-                <footer
-                    class="py-16 text-center text-sm text-black dark:text-white/70"
-                >
-                    All Right Reserved By {{ appName }} @{{ year }}
-                </footer>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="px-6 py-10" style="background-color: oklch(0.96 0.04 50);">
+            <div class="max-w-5xl mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div v-for="(stat, i) in stats" :key="i">
+                        <div class="text-2xl md:text-3xl font-bold" style="color: oklch(0.65 0.18 50);">{{ stat.value }}</div>
+                        <div class="text-sm font-medium" style="color: oklch(0.45 0.01 60);">{{ stat.label }}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="px-6 py-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl font-bold mb-2" style="color: oklch(0.15 0.01 60);">Everything you need to stay connected</h2>
+                    <p class="text-base" style="color: oklch(0.45 0.01 60);">Simple features that actually matter.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div
+                        v-for="(feature, i) in features"
+                        :key="i"
+                        class="text-center"
+                    >
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background-color: oklch(0.96 0.04 50);">
+                            <component :is="feature.icon" class="w-7 h-7" style="color: oklch(0.65 0.18 50);" />
+                        </div>
+                        <h3 class="font-semibold mb-2" style="color: oklch(0.15 0.01 60);">{{ feature.title }}</h3>
+                        <p class="text-sm" style="color: oklch(0.45 0.01 60);">{{ feature.desc }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="px-6 py-20" style="background-color: oklch(0.98 0.005 60);">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-3" style="color: oklch(0.15 0.01 60);">Getting started is easy</h2>
+                    <p class="text-lg" style="color: oklch(0.45 0.01 60);">Three simple steps to start chatting.</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div v-for="(step, i) in steps" :key="i" class="relative p-6 rounded-2xl border" style="border-color: oklch(0.91 0.005 60); background-color: oklch(1 0 0);">
+                        <div class="absolute -top-4 left-6 px-3 py-1 rounded-full text-sm font-bold text-white" style="background-color: oklch(0.65 0.18 50);">
+                            Step {{ step.num }}
+                        </div>
+                        <div class="pt-4">
+                            <h3 class="font-semibold text-lg mb-2" style="color: oklch(0.15 0.01 60);">{{ step.title }}</h3>
+                            <p class="text-sm" style="color: oklch(0.45 0.01 60);">{{ step.desc }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Chatty Section -->
+        <section class="px-6 py-20">
+            <div class="max-w-5xl mx-auto">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-4" style="color: oklch(0.15 0.01 60);">Why choose Chatty?</h2>
+                        <p class="text-lg mb-6" style="color: oklch(0.45 0.01 60);">
+                            We believe messaging should be simple. No gimmicks, no data collection, no monthly fees. Just you and the people you care about.
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div v-for="(item, i) in whyChatty" :key="i" class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background-color: oklch(0.65 0.18 50);">
+                                    <Check class="w-3 h-3 text-white" />
+                                </div>
+                                <span class="text-sm font-medium" style="color: oklch(0.15 0.01 60);">{{ item }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl p-8 border" style="border-color: oklch(0.91 0.005 60); background-color: oklch(0.96 0.04 50);">
+                        <div class="flex items-start gap-4 mb-6">
+                            <Clock class="w-6 h-6 shrink-0 mt-1" style="color: oklch(0.65 0.18 50);" />
+                            <div>
+                                <h3 class="font-semibold mb-1" style="color: oklch(0.15 0.01 60);">Always Free</h3>
+                                <p class="text-sm" style="color: oklch(0.45 0.01 60);">No premium tiers, no locked features. Everything is free, forever.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <Heart class="w-6 h-6 shrink-0 mt-1" style="color: oklch(0.65 0.18 50);" />
+                            <div>
+                                <h3 class="font-semibold mb-1" style="color: oklch(0.15 0.01 60);">Made with Care</h3>
+                                <p class="text-sm" style="color: oklch(0.45 0.01 60);">Built by people who believe in simple, honest communication.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="px-6 py-20" style="background-color: oklch(0.98 0.005 60);">
+            <div class="max-w-5xl mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-3" style="color: oklch(0.15 0.01 60);">What people are saying</h2>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div
+                        v-for="(testimonial, i) in testimonials"
+                        :key="i"
+                        class="p-6 rounded-2xl border transition-all hover:shadow-lg"
+                        style="border-color: oklch(0.91 0.005 60); background-color: oklch(1 0 0);"
+                    >
+                        <div class="flex gap-1 mb-4">
+                            <span v-for="n in 5" :key="n" style="color: oklch(0.65 0.18 50);">★</span>
+                        </div>
+                        <p class="text-sm mb-4 leading-relaxed" style="color: oklch(0.45 0.01 60);">"{{ testimonial.text }}"</p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white" style="background-color: oklch(0.65 0.18 50);">
+                                {{ testimonial.author[0] }}
+                            </div>
+                            <div>
+                                <p class="font-semibold text-sm" style="color: oklch(0.15 0.01 60);">{{ testimonial.author }}</p>
+                                <p class="text-xs" style="color: oklch(0.55 0.008 60);">{{ testimonial.role }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="px-6 py-20">
+            <div class="max-w-3xl mx-auto text-center">
+                <template v-if="$page.props.auth.user">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" style="color: oklch(0.15 0.01 60);">
+                        Welcome back!
+                    </h2>
+                    <p class="text-lg mb-8" style="color: oklch(0.45 0.01 60);">
+                        Ready to catch up with your friends and family?
+                    </p>
+                    <Link :href="route('conversations.index')" class="inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold text-white" style="background-color: oklch(0.65 0.18 50);">
+                        Open Chatty
+                    </Link>
+                </template>
+                <template v-else>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" style="color: oklch(0.15 0.01 60);">
+                        Ready to start chatting?
+                    </h2>
+                    <p class="text-lg mb-8" style="color: oklch(0.45 0.01 60);">
+                        Join thousands of people staying connected with friends and family.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link v-if="canRegister" :href="route('register')" class="inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold text-white" style="background-color: oklch(0.65 0.18 50);">
+                            Create Your Free Account
+                        </Link>
+                        <Link v-if="canLogin" :href="route('login')" class="inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold border-2" style="color: oklch(0.65 0.18 50); border-color: oklch(0.65 0.18 50);">
+                            Sign In Instead
+                        </Link>
+                    </div>
+                    <p class="mt-6 text-sm" style="color: oklch(0.45 0.01 60);">
+                        No credit card required · Free forever
+                    </p>
+                </template>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="px-6 py-8 border-t" style="border-color: oklch(0.91 0.005 60);">
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center rounded-lg h-7 w-7" style="background-color: oklch(0.65 0.18 50);">
+                        <MessageCircle class="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span class="font-medium" style="color: oklch(0.15 0.01 60);">{{ appName }}</span>
+                </div>
+                <p class="text-sm flex items-center gap-1" style="color: oklch(0.45 0.01 60);">
+                    Made with <Heart class="w-3.5 h-3.5 fill-current" style="color: oklch(0.65 0.18 50);" /> · {{ appName }} © {{ year }}
+                </p>
+            </div>
+        </footer>
     </div>
 </template>
